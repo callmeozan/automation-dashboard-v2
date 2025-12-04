@@ -1,0 +1,276 @@
+12.04 00:36
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JIS Automation - System Maintenance</title>
+    <style>
+      /* --- CSS STYLING --- */
+      :root {
+        --bg-color: #0f172a;
+        --card-bg: #1e293b;
+        --accent-color: #0ea5e9; /* Cyan Electric */
+        --text-color: #94a3b8;
+        --code-color: #22c55e; /* Terminal Green */
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Courier New", Courier, monospace; /* Font ala Coding */
+      }
+
+      body {
+        background-color: var(--bg-color);
+        height: 100vh;
+        display: flex;
+        flex-direction: column; /* Biar footer bisa diatur posisinya */
+        justify-content: center;
+        align-items: center;
+        color: white;
+        overflow: hidden;
+        position: relative;
+      }
+
+      /* Background Grid Effect */
+      body::before {
+        content: "";
+        position: absolute;
+        width: 200%;
+        height: 200%;
+        background-image: linear-gradient(
+            rgba(255, 255, 255, 0.03) 1px,
+            transparent 1px
+          ),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        background-size: 40px 40px;
+        z-index: -1;
+      }
+
+      .container {
+        background-color: var(--card-bg);
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 0 20px rgba(14, 165, 233, 0.2);
+        border: 1px solid rgba(14, 165, 233, 0.3);
+        text-align: center;
+        max-width: 600px;
+        width: 90%;
+        z-index: 10;
+      }
+
+      /* Gear Animation Container */
+      .gear-system {
+        position: relative;
+        height: 100px;
+        width: 100%;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .gear {
+        fill: var(--accent-color);
+        opacity: 0.8;
+        animation: spin 4s linear infinite;
+      }
+
+      .gear.small {
+        width: 40px;
+        animation-duration: 2s;
+        margin-right: -10px;
+        animation-direction: reverse;
+      }
+
+      .gear.big {
+        width: 80px;
+        z-index: 2;
+      }
+
+      @keyframes spin {
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      h1 {
+        color: white;
+        font-size: 1.8rem;
+        margin-bottom: 10px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+      }
+
+      p {
+        color: var(--text-color);
+        margin-bottom: 30px;
+        font-size: 0.9rem;
+      }
+
+      /* Fake Terminal / Console Log */
+      .terminal-window {
+        background-color: #000;
+        border-radius: 6px;
+        padding: 15px;
+        text-align: left;
+        height: 120px;
+        overflow: hidden;
+        border: 1px solid #333;
+        font-size: 0.8rem;
+        color: var(--code-color);
+        position: relative;
+      }
+
+      .log-line {
+        display: block;
+        margin-bottom: 5px;
+        opacity: 0;
+        animation: fadeIn 0.3s forwards;
+      }
+
+      @keyframes fadeIn {
+        to {
+          opacity: 1;
+        }
+      }
+
+      .cursor {
+        display: inline-block;
+        width: 8px;
+        height: 14px;
+        background-color: var(--code-color);
+        animation: blink 1s infinite;
+        vertical-align: middle;
+      }
+
+      @keyframes blink {
+        50% {
+          opacity: 0;
+        }
+      }
+
+      .status-badge {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 5px 15px;
+        background: rgba(14, 165, 233, 0.1);
+        color: var(--accent-color);
+        border-radius: 20px;
+        border: 1px solid var(--accent-color);
+        font-size: 0.8rem;
+        font-weight: bold;
+      }
+
+      /* --- FOOTER STYLE --- */
+      .footer {
+        position: absolute;
+        bottom: 20px;
+        width: 100%;
+        text-align: center;
+        font-size: 0.7rem;
+        color: var(--text-color);
+        opacity: 0.6;
+        letter-spacing: 1px;
+        z-index: 5;
+      }
+
+      /* Agar footer tidak menumpuk di layar pendek */
+      @media (max-height: 600px) {
+        .footer {
+          position: static;
+          margin-top: 30px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="gear-system">
+        <svg class="gear small" viewBox="0 0 24 24">
+          <path
+            d="M12 16a4 4 0 0 1-4-4 4 4 0 0 1 4-4 4 4 0 0 1 4 4 4 4 0 0 1-4 4m0-10c-.5 0-1.1 0-1.6.1l-1-1.7-.6.2 1 1.7c-.5.3-.9.7-1.2 1.2l-1.7-1-.2.6 1.7 1c-.1.5-.1 1.1-.1 1.6l-1.7 1 .2.6 1.7-1c.3.5.7.9 1.2 1.2l-1 1.7.6.2 1-1.7c.5.1 1.1.1 1.6.1l1 1.7.6-.2-1-1.7c.5-.3.9-.7 1.2-1.2l1.7 1 .2-.6-1.7-1c.1-.5.1-1.1.1-1.6l1.7-1-.2-.6-1.7 1c-.3-.5-.7-.9-1.2-1.2l1-1.7-.6-.2-1 1.7c-.5-.1-1.1-.1-1.6-.1Z"
+          />
+        </svg>
+
+        <svg class="gear big" viewBox="0 0 24 24">
+          <path
+            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1zM12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"
+          />
+        </svg>
+
+        <svg
+          class="gear small"
+          viewBox="0 0 24 24"
+          style="animation-direction: normal"
+        >
+          <path
+            d="M12 16a4 4 0 0 1-4-4 4 4 0 0 1 4-4 4 4 0 0 1 4 4 4 4 0 0 1-4 4m0-10c-.5 0-1.1 0-1.6.1l-1-1.7-.6.2 1 1.7c-.5.3-.9.7-1.2 1.2l-1.7-1-.2.6 1.7 1c-.1.5-.1 1.1-.1 1.6l-1.7 1 .2.6 1.7-1c.3.5.7.9 1.2 1.2l-1 1.7.6.2 1-1.7c.5.1 1.1.1 1.6.1l1 1.7.6-.2-1-1.7c.5-.3.9-.7 1.2-1.2l1.7 1 .2-.6-1.7-1c.1-.5.1-1.1.1-1.6l1.7-1-.2-.6-1.7 1c-.3-.5-.7-.9-1.2-1.2l1-1.7-.6-.2-1 1.7c-.5-.1-1.1-.1-1.6-.1Z"
+          />
+        </svg>
+      </div>
+
+      <h1>SYSTEM UPGRADE</h1>
+      <p>Internal System Under Maintenance</p>
+
+      <div class="terminal-window" id="terminal">
+        <span class="cursor"></span>
+      </div>
+
+      <div class="status-badge">STATUS: MAINTENANCE MODE ON</div>
+    </div>
+
+    <div class="footer">
+      JIS Automation Dept. Internal Website | Maintained by ZaanSkuy!
+    </div>
+
+    <script>
+      const terminal = document.getElementById("terminal");
+      const cursor = document.querySelector(".cursor");
+
+      const messages = [
+        "> Initializing update protocol...",
+        "> JIS Automation Dept. security check...",
+        "> Optimizing interface modules...",
+        "> Verifying user: Faozan Nur Amanulloh...",
+        "> Access Granted. Deploying patches...",
+        "> Please wait...",
+      ];
+
+      let msgIndex = 0;
+
+      function addLog() {
+        if (msgIndex < messages.length) {
+          const span = document.createElement("span");
+          span.className = "log-line";
+          span.innerText = messages[msgIndex];
+
+          terminal.insertBefore(span, cursor);
+          terminal.scrollTop = terminal.scrollHeight;
+
+          msgIndex++;
+          const randomTime = Math.floor(Math.random() * 800) + 800;
+          setTimeout(addLog, randomTime);
+        } else {
+          setTimeout(() => {
+            terminal.innerHTML = '<span class="cursor"></span>';
+            const doneSpan = document.createElement("span");
+            doneSpan.className = "log-line";
+            doneSpan.innerText = "> System Ready. Redirecting to Dashboard...";
+            doneSpan.style.color = "#22c55e"; // Hijau
+            terminal.insertBefore(doneSpan, document.querySelector(".cursor"));
+
+            // --- TAMBAHAN: REDIRECT OTOMATIS SETELAH 3 DETIK ---
+            setTimeout(() => {
+              window.location.href = "index.php"; // Balik ke Login/Dashboard
+            }, 3000);
+          }, 2000);
+        }
+      }
+
+      window.onload = addLog;
+    </script>
+  </body>
+</html>
