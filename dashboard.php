@@ -143,6 +143,30 @@ $queryMyReport = mysqli_query($conn, "SELECT * FROM tb_daily_reports WHERE pic L
         }
     </style>
 
+    <style>
+        /* 1. Supaya kursor jadi telunjuk saat hover di icon Kalender & Jam */
+        input[type="date"]::-webkit-calendar-picker-indicator,
+        input[type="time"]::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+        }
+
+        /* 2. MODE GELAP (DEFAULT di Website Bapak) */
+        /* Kita paksa elemen date/time menggunakan skema warna GELAP.
+       Otomatis browser akan mengubah icon jadi PUTIH. */
+        input[type="date"],
+        input[type="time"] {
+            color-scheme: dark;
+        }
+
+        /* 3. MODE TERANG (Saat ada class 'light-mode') */
+        /* Kita paksa balik ke skema warna TERANG.
+       Otomatis browser mengubah icon jadi HITAM. */
+        body.light-mode input[type="date"],
+        body.light-mode input[type="time"] {
+            color-scheme: light;
+        }
+    </style>
+
 </head>
 
 <body class="bg-slate-900 text-slate-200 font-sans antialiased">
@@ -213,6 +237,20 @@ $queryMyReport = mysqli_query($conn, "SELECT * FROM tb_daily_reports WHERE pic L
                             <?php echo isset($_SESSION['full_name']) ? $_SESSION['full_name'] : 'Guest'; ?>
                         </p>
                         <p class="text-xs text-emerald-500">Online</p>
+
+                        <!-- LAST LOGIN -->
+                        <!-- <?php
+                                // Kita query sebentar untuk ambil data terbaru
+                                $id_now = $_SESSION['user_id'];
+                                $qLast = mysqli_query($conn, "SELECT last_login FROM tb_users WHERE user_id='$id_now'");
+                                $dLast = mysqli_fetch_assoc($qLast);
+                                $lastLogin = $dLast['last_login'];
+                                ?>
+
+                        <p class="text-[10px] text-slate-400 mt-0.5">
+                            <i class="far fa-clock mr-1"></i>
+                            <?php echo ($lastLogin) ? date('d M, H:i', strtotime($lastLogin)) : 'Baru Gabung'; ?>
+                        </p> -->
                     </div>
                 </div>
             </div>
@@ -666,7 +704,8 @@ $queryMyReport = mysqli_query($conn, "SELECT * FROM tb_daily_reports WHERE pic L
 
                     <div>
                         <label class="block text-xs text-slate-400 mb-1 font-medium">12. Note / Sparepart Used</label>
-                        <input type="text" name="sparepart_used" placeholder="Catatan tambahan..." class="w-full bg-slate-950 border border-slate-700 text-white rounded px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none">
+                        <!-- <input type="text" name="sparepart_used" placeholder="Catatan tambahan..." class="w-full bg-slate-950 border border-slate-700 text-white rounded px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"> -->
+                        <textarea name="sparepart_used" rows="2" placeholder="Catatan tambahan..." class="w-full bg-slate-950 border border-slate-700 text-white rounded px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"></textarea>
                     </div>
 
                     <div>
@@ -678,7 +717,8 @@ $queryMyReport = mysqli_query($conn, "SELECT * FROM tb_daily_reports WHERE pic L
                                     <p class="text-sm text-slate-400 mb-1"><span class="font-semibold text-emerald-400">Klik untuk upload</span></p>
                                     <p id="file-name-display" class="text-xs text-emerald-400 mt-2 font-medium hidden"></p>
                                 </div>
-                                <input id="file_evidence" type="file" name="evidence" class="hidden" />
+                                <!-- <input id="file_evidence" type="file" name="evidence" class="hidden" /> -->
+                                <input id="file_evidence" type="file" name="evidence[]" multiple accept="image/*,.pdf" class="hidden" />
                             </label>
                         </div>
                     </div>
@@ -827,7 +867,7 @@ $queryMyReport = mysqli_query($conn, "SELECT * FROM tb_daily_reports WHERE pic L
                         </div>
                         <div>
                             <label class="block text-xs text-slate-400 mb-1">Project Status</label>
-                            <select name="status" class="w-full bg-slate-950 border border-slate-700 text-white rounded px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none">
+                            <select name="status" class="w-full bg-slate-950 border border-slate-700 text-white rounded px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none" required>
                                 <option value="">-- Pilih --</option>
                                 <option value="In Progress">In Progress</option>
                                 <option value="To Do">To Do</option>
@@ -1205,6 +1245,45 @@ $queryMyReport = mysqli_query($conn, "SELECT * FROM tb_daily_reports WHERE pic L
 
             openModal('modalEditProject');
         }
+
+        // --- TAMBAHAN LOGIC UPLOAD 5 GAMBAR (Sama seperti di laporan.php) ---
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('file_evidence');
+            const fileNameDisplay = document.getElementById('file-name-display');
+
+            if (fileInput && fileNameDisplay) {
+                fileInput.addEventListener('change', function(e) {
+                    const files = this.files;
+
+                    // 1. Validasi Maksimal 5 File
+                    if (files.length > 5) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Terlalu Banyak!',
+                            text: 'Maksimal hanya boleh upload 5 gambar sekaligus.',
+                            confirmButtonColor: '#f59e0b',
+                            background: '#1e293b',
+                            color: '#fff'
+                        });
+                        this.value = ''; // Reset
+                        fileNameDisplay.classList.add('hidden');
+                        return;
+                    }
+
+                    // 2. Tampilkan Info Nama File
+                    if (files.length > 0) {
+                        fileNameDisplay.classList.remove('hidden');
+                        if (files.length === 1) {
+                            fileNameDisplay.textContent = `📄 ${files[0].name}`;
+                        } else {
+                            fileNameDisplay.textContent = `📂 ${files.length} file dipilih`;
+                        }
+                    } else {
+                        fileNameDisplay.classList.add('hidden');
+                    }
+                });
+            }
+        });
     </script>
 
     <script src="assets/js/ui-sidebar.js"></script>

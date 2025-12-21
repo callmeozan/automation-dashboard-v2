@@ -1,276 +1,354 @@
-12.04 00:36
 <!DOCTYPE html>
 <html lang="id">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>JIS Automation - System Maintenance</title>
+    <title>JIS Automation | Maintenance</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap"
+      rel="stylesheet"
+    />
+
     <style>
-      /* --- CSS STYLING --- */
       :root {
-        --bg-color: #0f172a;
-        --card-bg: #1e293b;
-        --accent-color: #0ea5e9; /* Cyan Electric */
-        --text-color: #94a3b8;
-        --code-color: #22c55e; /* Terminal Green */
+        /* --- 1. BACKGROUND (DARK THEME - JIS PORTAL STYLE) --- */
+        /* Mengambil warna dari screenshot: Sangat gelap, hampir hitam ke biru tua */
+        --bg-gradient: linear-gradient(135deg, #020617 0%, #0f172a 100%);
+
+        /* --- 2. WARNA ORB (ACCENT WEBSITE) --- */
+        /* Orb 1: HIJAU TEAL (Sesuai tombol LOGIN) */
+        --orb-1-color: #10b981;
+        /* Orb 2: BIRU SAMUDRA (Supaya blend dengan background) */
+        --orb-2-color: #0ea5e9;
+
+        /* --- 3. GLASS CARD (DARK MODE) --- */
+        /* Warna kartu gelap transparan seperti area login */
+        --card-bg: rgba(15, 23, 42, 0.6);
+        --border-color: rgba(255, 255, 255, 0.08);
+        --card-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+
+        /* --- 4. TEXT COLORS --- */
+        --text-main: #ffffff; /* Putih bersih */
+        --text-muted: #94a3b8; /* Abu-abu slate (Slate-400) */
+
+        /* --- 5. PROGRESS BAR & ACCENT --- */
+        --accent: #10b981; /* Hijau Teal */
+        --accent-glow: rgba(16, 185, 129, 0.3); /* Cahaya hijau */
       }
 
       * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
-        font-family: "Courier New", Courier, monospace; /* Font ala Coding */
+        font-family: "Inter", sans-serif;
       }
 
       body {
-        background-color: var(--bg-color);
+        background: var(--bg-gradient);
         height: 100vh;
         display: flex;
-        flex-direction: column; /* Biar footer bisa diatur posisinya */
-        justify-content: center;
+        flex-direction: column;
         align-items: center;
-        color: white;
+        justify-content: center;
+        color: var(--text-main);
         overflow: hidden;
-        position: relative;
       }
 
-      /* Background Grid Effect */
-      body::before {
+      /* ORB (Bola Cahaya) */
+      .orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(100px); /* Blur sangat halus */
+        z-index: -1;
+        opacity: 0.4; /* Opacity rendah biar tidak menyilaukan */
+        animation: breath 8s ease-in-out infinite alternate;
+      }
+
+      /* Orb 1: Hijau Teal (Kiri Atas) */
+      .orb-1 {
+        width: 350px;
+        height: 350px;
+        background: var(--orb-1-color);
+        top: -100px;
+        left: -100px;
+      }
+
+      /* Orb 2: Biru (Kanan Bawah) */
+      .orb-2 {
+        width: 400px;
+        height: 400px;
+        background: var(--orb-2-color);
+        bottom: -100px;
+        right: -100px;
+        animation-delay: -4s;
+      }
+
+      @keyframes breath {
+        0% {
+          transform: scale(1);
+          opacity: 0.3;
+        }
+        100% {
+          transform: scale(1.1);
+          opacity: 0.5;
+        }
+      }
+
+      /* Container Kartu (Mirip Box Login JIS Portal) */
+      .glass-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--border-color);
+        border-radius: 16px; /* Radius sudut agak kotak dikit */
+        padding: 50px 40px;
+        width: 90%;
+        max-width: 450px; /* Lebar mirip form login */
+        text-align: center;
+        box-shadow: var(--card-shadow);
+        transform: translateY(0);
+        animation: float 6s ease-in-out infinite;
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+      }
+
+      /* Icon Animasi Tengah */
+      .icon-container {
+        width: 80px;
+        height: 80px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 25px;
+        position: relative;
+        box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
+      }
+
+      .icon-container::after {
         content: "";
         position: absolute;
-        width: 200%;
-        height: 200%;
-        background-image: linear-gradient(
-            rgba(255, 255, 255, 0.03) 1px,
-            transparent 1px
-          ),
-          linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-        background-size: 40px 40px;
-        z-index: -1;
-      }
-
-      .container {
-        background-color: var(--card-bg);
-        padding: 40px;
-        border-radius: 12px;
-        box-shadow: 0 0 20px rgba(14, 165, 233, 0.2);
-        border: 1px solid rgba(14, 165, 233, 0.3);
-        text-align: center;
-        max-width: 600px;
-        width: 90%;
-        z-index: 10;
-      }
-
-      /* Gear Animation Container */
-      .gear-system {
-        position: relative;
-        height: 100px;
         width: 100%;
-        margin-bottom: 20px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      }
-
-      .gear {
-        fill: var(--accent-color);
-        opacity: 0.8;
-        animation: spin 4s linear infinite;
-      }
-
-      .gear.small {
-        width: 40px;
-        animation-duration: 2s;
-        margin-right: -10px;
-        animation-direction: reverse;
-      }
-
-      .gear.big {
-        width: 80px;
-        z-index: 2;
-      }
-
-      @keyframes spin {
-        100% {
-          transform: rotate(360deg);
-        }
-      }
-
-      h1 {
-        color: white;
-        font-size: 1.8rem;
-        margin-bottom: 10px;
-        letter-spacing: 2px;
-        text-transform: uppercase;
-      }
-
-      p {
-        color: var(--text-color);
-        margin-bottom: 30px;
-        font-size: 0.9rem;
-      }
-
-      /* Fake Terminal / Console Log */
-      .terminal-window {
-        background-color: #000;
-        border-radius: 6px;
-        padding: 15px;
-        text-align: left;
-        height: 120px;
-        overflow: hidden;
-        border: 1px solid #333;
-        font-size: 0.8rem;
-        color: var(--code-color);
-        position: relative;
-      }
-
-      .log-line {
-        display: block;
-        margin-bottom: 5px;
+        height: 100%;
+        border-radius: 50%;
+        border: 2px solid var(--accent);
         opacity: 0;
-        animation: fadeIn 0.3s forwards;
+        animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
       }
 
-      @keyframes fadeIn {
-        to {
+      @keyframes pulse-ring {
+        0% {
+          transform: scale(0.8);
           opacity: 1;
         }
-      }
-
-      .cursor {
-        display: inline-block;
-        width: 8px;
-        height: 14px;
-        background-color: var(--code-color);
-        animation: blink 1s infinite;
-        vertical-align: middle;
-      }
-
-      @keyframes blink {
-        50% {
+        100% {
+          transform: scale(2);
           opacity: 0;
         }
       }
 
-      .status-badge {
-        display: inline-block;
-        margin-top: 20px;
-        padding: 5px 15px;
-        background: rgba(14, 165, 233, 0.1);
-        color: var(--accent-color);
-        border-radius: 20px;
-        border: 1px solid var(--accent-color);
-        font-size: 0.8rem;
-        font-weight: bold;
+      /* SVG Icon */
+      .icon-svg {
+        width: 32px;
+        height: 32px;
+        fill: none;
+        stroke: var(--accent); /* Warna Hijau Teal */
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
       }
 
-      /* --- FOOTER STYLE --- */
+      h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+        letter-spacing: 0.5px;
+        color: var(--text-main);
+      }
+
+      /* Memberikan warna Hijau pada kata JIS Portal */
+      h1 span {
+        color: var(--accent);
+      }
+
+      p {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        line-height: 1.6;
+        margin-bottom: 30px;
+      }
+
+      /* Modern Progress Bar */
+      .progress-container {
+        background: rgba(255, 255, 255, 0.05); /* Track gelap */
+        height: 6px;
+        border-radius: 10px;
+        overflow: hidden;
+        position: relative;
+        margin-bottom: 15px;
+      }
+
+      .progress-fill {
+        /* Gradient Hijau JIS Portal */
+        background: linear-gradient(90deg, #10b981, #34d399);
+        height: 100%;
+        width: 0%;
+        border-radius: 10px;
+        transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 0 15px var(--accent-glow);
+      }
+
+      .status-text {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        display: flex;
+        justify-content: space-between;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+      }
+
       .footer {
-        position: absolute;
-        bottom: 20px;
-        width: 100%;
-        text-align: center;
+        margin-top: 30px;
         font-size: 0.7rem;
-        color: var(--text-color);
-        opacity: 0.6;
-        letter-spacing: 1px;
-        z-index: 5;
+        color: rgba(255, 255, 255, 0.2);
       }
 
-      /* Agar footer tidak menumpuk di layar pendek */
-      @media (max-height: 600px) {
-        .footer {
-          position: static;
-          margin-top: 30px;
-        }
+      .fade-in {
+        animation: fadeIn 0.5s forwards;
       }
     </style>
   </head>
   <body>
-    <div class="container">
-      <div class="gear-system">
-        <svg class="gear small" viewBox="0 0 24 24">
-          <path
-            d="M12 16a4 4 0 0 1-4-4 4 4 0 0 1 4-4 4 4 0 0 1 4 4 4 4 0 0 1-4 4m0-10c-.5 0-1.1 0-1.6.1l-1-1.7-.6.2 1 1.7c-.5.3-.9.7-1.2 1.2l-1.7-1-.2.6 1.7 1c-.1.5-.1 1.1-.1 1.6l-1.7 1 .2.6 1.7-1c.3.5.7.9 1.2 1.2l-1 1.7.6.2 1-1.7c.5.1 1.1.1 1.6.1l1 1.7.6-.2-1-1.7c.5-.3.9-.7 1.2-1.2l1.7 1 .2-.6-1.7-1c.1-.5.1-1.1.1-1.6l1.7-1-.2-.6-1.7 1c-.3-.5-.7-.9-1.2-1.2l1-1.7-.6-.2-1 1.7c-.5-.1-1.1-.1-1.6-.1Z"
-          />
-        </svg>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
 
-        <svg class="gear big" viewBox="0 0 24 24">
+    <div class="glass-card">
+      <div class="icon-container">
+        <svg class="icon-svg" viewBox="0 0 24 24">
           <path
-            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1zM12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"
-          />
-        </svg>
-
-        <svg
-          class="gear small"
-          viewBox="0 0 24 24"
-          style="animation-direction: normal"
-        >
-          <path
-            d="M12 16a4 4 0 0 1-4-4 4 4 0 0 1 4-4 4 4 0 0 1 4 4 4 4 0 0 1-4 4m0-10c-.5 0-1.1 0-1.6.1l-1-1.7-.6.2 1 1.7c-.5.3-.9.7-1.2 1.2l-1.7-1-.2.6 1.7 1c-.1.5-.1 1.1-.1 1.6l-1.7 1 .2.6 1.7-1c.3.5.7.9 1.2 1.2l-1 1.7.6.2 1-1.7c.5.1 1.1.1 1.6.1l1 1.7.6-.2-1-1.7c.5-.3.9-.7 1.2-1.2l1.7 1 .2-.6-1.7-1c.1-.5.1-1.1.1-1.6l1.7-1-.2-.6-1.7 1c-.3-.5-.7-.9-1.2-1.2l1-1.7-.6-.2-1 1.7c-.5-.1-1.1-.1-1.6-.1Z"
-          />
+            d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"
+          ></path>
         </svg>
       </div>
 
-      <h1>SYSTEM UPGRADE</h1>
-      <p>Internal System Under Maintenance</p>
+      <h1><span>JIS PORTAL</span><br />Under Maintenance</h1>
+      <p>
+        We are currently optimizing the system performance. Please wait a moment
+        while we update it.
+      </p>
 
-      <div class="terminal-window" id="terminal">
-        <span class="cursor"></span>
+      <div class="progress-container">
+        <div class="progress-fill" id="progressBar"></div>
       </div>
 
-      <div class="status-badge">STATUS: MAINTENANCE MODE ON</div>
-    </div>
+      <div class="status-text">
+        <span id="processText">Checking protocols...</span>
+        <span id="percentText">0%</span>
+      </div>
 
-    <div class="footer">
-      JIS Automation Dept. Internal Website | Maintained by ZaanSkuy!
+      <!-- <div class="footer">
+        &copy; 2025 JIS Automation Dept.<br>Internal Use Only.
+      </div> -->
+      <div class="footer">
+        &copy; JIS Automation Dept | Internal Use Only.<br />
+        Maintenance by ZaanSkuy
+      </div>
     </div>
 
     <script>
-      const terminal = document.getElementById("terminal");
-      const cursor = document.querySelector(".cursor");
+      const progressBar = document.getElementById("progressBar");
+      const percentText = document.getElementById("percentText");
+      const processText = document.getElementById("processText");
 
-      const messages = [
-        "> Initializing update protocol...",
-        "> JIS Automation Dept. security check...",
-        "> Optimizing interface modules...",
-        "> Verifying user: Faozan Nur Amanulloh...",
-        "> Access Granted. Deploying patches...",
-        "> Please wait...",
+      const steps = [
+        "Connecting to server...",
+        "Scanning data integrity...",
+        "Downloading security patches...",
+        "Optimizing database cache...",
+        "Reconfiguring modules...",
+        "Synchronizing system...",
       ];
 
-      let msgIndex = 0;
+      let progress = 0;
+      let isMaintenanceActive = true;
 
-      function addLog() {
-        if (msgIndex < messages.length) {
-          const span = document.createElement("span");
-          span.className = "log-line";
-          span.innerText = messages[msgIndex];
+      // --- FUNGSI 1: ANIMASI LOADING ---
+      function simulateLoading() {
+        if (isMaintenanceActive) {
+          // MODE MAINTENANCE: Loading pelan & berulang (Infinite Loop)
+          const increment = 0.2;
+          progress += increment;
 
-          terminal.insertBefore(span, cursor);
-          terminal.scrollTop = terminal.scrollHeight;
-
-          msgIndex++;
-          const randomTime = Math.floor(Math.random() * 800) + 800;
-          setTimeout(addLog, randomTime);
+          if (progress >= 100) {
+            progress = 0;
+          }
         } else {
-          setTimeout(() => {
-            terminal.innerHTML = '<span class="cursor"></span>';
-            const doneSpan = document.createElement("span");
-            doneSpan.className = "log-line";
-            doneSpan.innerText = "> System Ready. Redirecting to Dashboard...";
-            doneSpan.style.color = "#22c55e"; // Hijau
-            terminal.insertBefore(doneSpan, document.querySelector(".cursor"));
+          // MODE SELESAI
+          progress += 2;
 
-            // --- TAMBAHAN: REDIRECT OTOMATIS SETELAH 3 DETIK ---
-            setTimeout(() => {
-              window.location.href = "index.php"; // Balik ke Login/Dashboard
-            }, 3000);
-          }, 2000);
+          if (progress >= 100) {
+            progress = 100;
+            finishAndRedirect();
+            return;
+          }
+        }
+
+        updateUI();
+        setTimeout(simulateLoading, 40);
+      }
+
+      // --- FUNGSI 2: UPDATE TAMPILAN ---
+      function updateUI() {
+        progressBar.style.width = `${progress}%`;
+        percentText.innerText = `${Math.floor(progress)}%`;
+
+        if (isMaintenanceActive) {
+          const stepSize = 100 / steps.length;
+          const currentStepIndex = Math.floor(progress / stepSize);
+          if (steps[currentStepIndex]) {
+            processText.innerText = steps[currentStepIndex];
+          }
+        } else {
+          processText.innerText = "Maintenance Complete! Redirecting...";
+          processText.style.color = "#10b981"; // Hijau Teal
         }
       }
 
-      window.onload = addLog;
+      // --- FUNGSI 3: CEK STATUS KE SERVER ---
+      function checkServerStatus() {
+        fetch("check_maintenance.php")
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.maintenance === false || data.maintenance === "false") {
+              isMaintenanceActive = false;
+            }
+          })
+          .catch((err) =>
+            console.log("Belum bisa konek, lanjut maintenance...")
+          );
+      }
+
+      // --- FUNGSI 4: REDIRECT ---
+      function finishAndRedirect() {
+        setTimeout(() => {
+          window.location.href = "index.php";
+        }, 1000);
+      }
+
+      // --- JALANKAN SEMUA ---
+      window.onload = () => {
+        setTimeout(simulateLoading, 500);
+        setInterval(checkServerStatus, 2000);
+      };
     </script>
   </body>
 </html>

@@ -16,13 +16,17 @@ $short_name = mysqli_real_escape_string($conn, $_POST['short_name']);
 $role       = mysqli_real_escape_string($conn, $_POST['role']);
 $avatar     = 'default.png'; // Default foto
 
+// LOGIKA REDIRECT PINTAR
+// Kalau ada input 'redirect_to', pakai itu. Kalau tidak, balik ke dashboard.
+$redirect_url = isset($_POST['redirect_to']) ? $_POST['redirect_to'] : '../dashboard.php';
+
 // 2. Hash Password (MD5)
 // PENTING: Harus MD5 karena auth.php kita pakai md5()
 $password_hash = md5($password);
 
 // 3. Cek Username Kembar
 $check = mysqli_query($conn, "SELECT username FROM tb_users WHERE username = '$username'");
-if(mysqli_num_rows($check) > 0){
+if (mysqli_num_rows($check) > 0) {
     header("Location: ../dashboard.php?status=error&msg=Username/NIK sudah terdaftar!");
     exit();
 }
@@ -37,4 +41,3 @@ if (mysqli_query($conn, $query)) {
     $error = urlencode(mysqli_error($conn));
     header("Location: ../dashboard.php?status=error&msg=$error");
 }
-?>

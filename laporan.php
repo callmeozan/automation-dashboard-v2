@@ -90,6 +90,30 @@ $totalNotif = $countBreakdown + $countOverdue;
             color: white !important;
         }
     </style>
+
+    <style>
+        /* 1. Supaya kursor jadi telunjuk saat hover di icon Kalender & Jam */
+        input[type="date"]::-webkit-calendar-picker-indicator,
+        input[type="time"]::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+        }
+
+        /* 2. MODE GELAP (DEFAULT di Website Bapak) */
+        /* Kita paksa elemen date/time menggunakan skema warna GELAP.
+       Otomatis browser akan mengubah icon jadi PUTIH. */
+        input[type="date"],
+        input[type="time"] {
+            color-scheme: dark;
+        }
+
+        /* 3. MODE TERANG (Saat ada class 'light-mode') */
+        /* Kita paksa balik ke skema warna TERANG.
+       Otomatis browser mengubah icon jadi HITAM. */
+        body.light-mode input[type="date"],
+        body.light-mode input[type="time"] {
+            color-scheme: light;
+        }
+    </style>
 </head>
 
 <body class="bg-slate-900 text-slate-200 font-sans antialiased">
@@ -330,6 +354,13 @@ $totalNotif = $countBreakdown + $countOverdue;
 
                                     while ($row = mysqli_fetch_assoc($query)) {
                                         $id = $row['report_id'];
+                                        // $clean_problem = htmlspecialchars(str_replace(array("\r", "\n"), " ", $row['problem']), ENT_QUOTES);
+                                        // $clean_action  = htmlspecialchars(str_replace(array("\r", "\n"), " ", $row['action']), ENT_QUOTES);
+
+                                        // 2. Ganti Enter dengan Penanda Unik "_ENTER_"
+                                        $clean_problem = str_replace(array("\r\n", "\r", "\n"), "_ENTER_", $row['problem']);
+                                        $clean_action  = str_replace(array("\r\n", "\r", "\n"), "_ENTER_", $row['action']);
+                                        $clean_part  = str_replace(array("\r\n", "\r", "\n"), "_ENTER_", $row['sparepart_used']);
 
                                         // Logika Warna Badge Kategori
                                         $catColor = 'text-slate-400 border-slate-500'; // Default
@@ -420,10 +451,14 @@ $totalNotif = $countBreakdown + $countOverdue;
                                                     '<?php echo $row['time_finish']; ?>',
                                                     '<?php echo htmlspecialchars($row['machine_name'], ENT_QUOTES); ?>',
                                                     '<?php echo htmlspecialchars($row['category'], ENT_QUOTES); ?>',
-                                                    '<?php echo htmlspecialchars($row['problem'], ENT_QUOTES); ?>',
-                                                    '<?php echo htmlspecialchars($row['action'], ENT_QUOTES); ?>',
+
+                                                    '<?php echo $clean_problem; ?>',
+                                                    '<?php echo $clean_action; ?>', 
+                                                    
                                                     '<?php echo htmlspecialchars($row['pic'], ENT_QUOTES); ?>',
-                                                    '<?php echo htmlspecialchars($row['sparepart_used'], ENT_QUOTES); ?>',
+
+                                                    '<?php echo $clean_part; ?>',
+                                                    
                                                     '<?php echo $row['status']; ?>'
                                                 )" class="bg-slate-700 hover:bg-blue-600 text-white w-8 h-8 rounded flex items-center justify-center transition" title="Edit">
                                                             <i class="fas fa-pen text-xs"></i>
@@ -480,7 +515,7 @@ $totalNotif = $countBreakdown + $countOverdue;
                                                         </div>
                                                     </div>
 
-                                                    <div class="space-y-2">
+                                                    <!-- <div class="space-y-2">
                                                         <h4 class="text-emerald-400 font-bold uppercase tracking-wider mb-2">📷 Lampiran / Evidence</h4>
                                                         <?php if (!empty($row['evidence_file'])): ?>
                                                             <a href="uploads/<?php echo $row['evidence_file']; ?>" target="_blank" class="bg-slate-900 p-2 rounded border border-slate-700 flex items-center justify-between group cursor-pointer hover:border-emerald-500 transition">
@@ -495,6 +530,43 @@ $totalNotif = $countBreakdown + $countOverdue;
                                                                 </div>
                                                                 <i class="fas fa-download text-slate-500 group-hover:text-emerald-400 mr-2"></i>
                                                             </a>
+                                                        <?php else: ?>
+                                                            <span class="text-slate-500 italic">- Tidak ada lampiran -</span>
+                                                        <?php endif; ?>
+                                                    </div> -->
+
+                                                    <div class="space-y-2">
+                                                        <h4 class="text-emerald-400 font-bold uppercase tracking-wider mb-2">📷 Lampiran / Evidence</h4>
+
+                                                        <?php if (!empty($row['evidence_file'])):
+                                                            // 1. Pecah string menjadi array berdasarkan koma
+                                                            $files = explode(',', $row['evidence_file']);
+                                                        ?>
+                                                            <div class="grid grid-cols-1 gap-2"> <?php foreach ($files as $file):
+                                                                                                        $file = trim($file); // Hapus spasi jika ada
+                                                                                                        if (empty($file)) continue;
+                                                                                                    ?>
+                                                                    <a href="uploads/<?php echo $file; ?>" target="_blank" class="bg-slate-900 p-2 rounded border border-slate-700 flex items-center justify-between group cursor-pointer hover:border-emerald-500 transition">
+                                                                        <div class="flex items-center gap-3">
+                                                                            <div class="w-8 h-8 bg-slate-800 rounded flex items-center justify-center text-slate-400">
+                                                                                <?php if (strpos($file, '.pdf') !== false): ?>
+                                                                                    <i class="fas fa-file-pdf text-red-400"></i>
+                                                                                <?php else: ?>
+                                                                                    <i class="fas fa-image text-blue-400"></i>
+                                                                                <?php endif; ?>
+                                                                            </div>
+                                                                            <div>
+                                                                                <div class="text-white font-medium truncate w-32" title="<?php echo $file; ?>">
+                                                                                    <?php echo (strlen($file) > 15) ? substr($file, 11) : $file; // Potong timestamp depannya biar rapi (opsional) 
+                                                                                    ?>
+                                                                                </div>
+                                                                                <div class="text-[10px] text-slate-500">Klik untuk lihat</div>
+                                                                            </div>
+                                                                        </div>
+                                                                        <i class="fas fa-external-link-alt text-slate-600 group-hover:text-emerald-400 mr-2 text-xs"></i>
+                                                                    </a>
+                                                                <?php endforeach; ?>
+                                                            </div>
                                                         <?php else: ?>
                                                             <span class="text-slate-500 italic">- Tidak ada lampiran -</span>
                                                         <?php endif; ?>
@@ -649,7 +721,8 @@ $totalNotif = $countBreakdown + $countOverdue;
 
                     <div>
                         <label class="block text-xs text-slate-400 mb-1 font-medium">12. Note / Sparepart Used</label>
-                        <input type="text" name="sparepart_used" placeholder="Catatan tambahan..." class="w-full bg-slate-950 border border-slate-700 text-white rounded px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none">
+                        <!-- <input type="text" name="sparepart_used" placeholder="Catatan tambahan..." class="w-full bg-slate-950 border border-slate-700 text-white rounded px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"> -->
+                        <textarea name="sparepart_used" rows="2" placeholder="Catatan tambahan..." class="w-full bg-slate-950 border border-slate-700 text-white rounded px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"></textarea>
                     </div>
 
                     <div>
@@ -661,7 +734,8 @@ $totalNotif = $countBreakdown + $countOverdue;
                                     <p class="text-sm text-slate-400 mb-1"><span class="font-semibold text-emerald-400">Klik untuk upload</span></p>
                                     <p id="file-name-display" class="text-xs text-emerald-400 mt-2 font-medium hidden"></p>
                                 </div>
-                                <input id="file_evidence" type="file" name="evidence" class="hidden" />
+                                <!-- <input id="file_evidence" type="file" name="evidence" class="hidden" /> -->
+                                <input id="file_evidence" type="file" name="evidence[]" multiple accept="image/*,.pdf" class="hidden" />
                             </label>
                         </div>
                     </div>
@@ -797,7 +871,8 @@ $totalNotif = $countBreakdown + $countOverdue;
 
                     <div>
                         <label class="block text-xs text-slate-400 mb-1 font-medium">Sparepart Used / Note</label>
-                        <input type="text" name="sparepart_used" id="edit_part" class="w-full bg-slate-950 border border-slate-700 text-white rounded px-3 py-2 text-sm focus:border-blue-500 focus:outline-none">
+                        <!-- <input type="text" name="sparepart_used" id="edit_part" class="w-full bg-slate-950 border border-slate-700 text-white rounded px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"> -->
+                        <textarea name="sparepart_used" id="edit_part" rows="2" placeholder="Catatan tambahan..." class="w-full bg-slate-950 border border-slate-700 text-white rounded px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"></textarea>
                     </div>
 
                     <div class="bg-slate-800/50 p-4 rounded-lg border border-slate-700/50">
@@ -812,7 +887,8 @@ $totalNotif = $countBreakdown + $countOverdue;
                                     <p id="file-name-edit" class="text-xs text-emerald-400 mt-2 font-medium hidden"></p>
                                 </div>
 
-                                <input id="file_evidence_edit" type="file" name="evidence" class="hidden" />
+                                <!-- <input id="file_evidence_edit" type="file" name="evidence" class="hidden" /> -->
+                                <input id="file_evidence_edit" type="file" name="evidence[]" multiple accept="image/*,.pdf" class="hidden" />
                             </label>
                         </div>
                     </div>
@@ -846,9 +922,17 @@ $totalNotif = $countBreakdown + $countOverdue;
             document.getElementById('edit_finish').value = finish;
             document.getElementById('edit_machine').value = machine;
             if (document.getElementById('edit_cat')) document.getElementById('edit_cat').value = cat;
-            document.getElementById('edit_problem').value = prob;
-            document.getElementById('edit_action').value = act;
-            document.getElementById('edit_part').value = part;
+
+            const realProblem = prob.split("_ENTER_").join("\n");
+            const realAction = act.split("_ENTER_").join("\n");
+            document.getElementById('edit_problem').value = realProblem;
+            document.getElementById('edit_action').value = realAction;
+            // document.getElementById('edit_problem').value = prob;
+            // document.getElementById('edit_action').value = act;
+
+            const realPart = part.split("_ENTER_").join("\n");
+            document.getElementById('edit_part').value = realPart;
+            // document.getElementById('edit_part').value = part;
             if (document.getElementById('edit_status')) document.getElementById('edit_status').value = status;
 
             // Populate Tom Select
@@ -964,26 +1048,67 @@ $totalNotif = $countBreakdown + $countOverdue;
             }
 
             // B. Logic Upload Filename
-            const fileInput = document.getElementById('file_evidence');
-            const fileNameDisplay = document.getElementById('file-name-display');
-            if (fileInput && fileNameDisplay) {
-                fileInput.addEventListener('change', function(e) {
-                    if (this.files.length > 0) {
-                        fileNameDisplay.classList.remove('hidden');
-                        fileNameDisplay.textContent = `📄 ${this.files[0].name}`;
-                    }
-                });
-            }
-            const fileInputEdit = document.getElementById('file_evidence_edit');
-            const fileNameEdit = document.getElementById('file-name-edit');
-            if (fileInputEdit && fileNameEdit) {
-                fileInputEdit.addEventListener('change', function(e) {
-                    if (this.files.length > 0) {
-                        fileNameEdit.classList.remove('hidden');
-                        fileNameEdit.textContent = `📄 ${this.files[0].name}`;
-                    }
-                });
-            }
+            // const fileInput = document.getElementById('file_evidence');
+            // const fileNameDisplay = document.getElementById('file-name-display');
+            // if (fileInput && fileNameDisplay) {
+            //     fileInput.addEventListener('change', function(e) {
+            //         if (this.files.length > 0) {
+            //             fileNameDisplay.classList.remove('hidden');
+            //             fileNameDisplay.textContent = `📄 ${this.files[0].name}`;
+            //         }
+            //     });
+            // }
+            // const fileInputEdit = document.getElementById('file_evidence_edit');
+            // const fileNameEdit = document.getElementById('file-name-edit');
+            // if (fileInputEdit && fileNameEdit) {
+            //     fileInputEdit.addEventListener('change', function(e) {
+            //         if (this.files.length > 0) {
+            //             fileNameEdit.classList.remove('hidden');
+            //             fileNameEdit.textContent = `📄 ${this.files[0].name}`;
+            //         }
+            //     });
+            // }
+
+            // B. Logic Upload Filename (MULTIPLE SUPPORT)
+            const setupFileUpload = (inputId, displayId) => {
+                const fileInput = document.getElementById(inputId);
+                const fileNameDisplay = document.getElementById(displayId);
+
+                if (fileInput && fileNameDisplay) {
+                    fileInput.addEventListener('change', function(e) {
+                        const files = this.files;
+
+                        // 1. Cek Jumlah File (Max 5)
+                        if (files.length > 5) {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Terlalu Banyak!',
+                                text: 'Maksimal hanya boleh upload 5 gambar sekaligus.',
+                                confirmButtonColor: '#f59e0b'
+                            });
+                            this.value = ''; // Reset
+                            fileNameDisplay.classList.add('hidden');
+                            return;
+                        }
+
+                        // 2. Tampilkan Nama File
+                        if (files.length > 0) {
+                            fileNameDisplay.classList.remove('hidden');
+                            if (files.length === 1) {
+                                fileNameDisplay.textContent = `📄 ${files[0].name}`;
+                            } else {
+                                fileNameDisplay.textContent = `📂 ${files.length} file dipilih`;
+                            }
+                        } else {
+                            fileNameDisplay.classList.add('hidden');
+                        }
+                    });
+                }
+            };
+
+            // Jalankan fungsi untuk Modal Create & Edit
+            setupFileUpload('file_evidence', 'file-name-display');
+            setupFileUpload('file_evidence_edit', 'file-name-edit');
 
             // C. Logic Notifikasi URL
             const urlParams = new URLSearchParams(window.location.search);

@@ -149,6 +149,7 @@ $totalNotif = $countBreakdown + $countOverdue;
             }
         }
     </style>
+
     <style>
         /* ... css lainnya ... */
 
@@ -169,6 +170,30 @@ $totalNotif = $countBreakdown + $countOverdue;
             opacity: 1;
             transform: scale(1);
             pointer-events: auto;
+        }
+    </style>
+
+    <style>
+        /* 1. Supaya kursor jadi telunjuk saat hover di icon Kalender & Jam */
+        input[type="date"]::-webkit-calendar-picker-indicator,
+        input[type="time"]::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+        }
+
+        /* 2. MODE GELAP (DEFAULT di Website Bapak) */
+        /* Kita paksa elemen date/time menggunakan skema warna GELAP.
+       Otomatis browser akan mengubah icon jadi PUTIH. */
+        input[type="date"],
+        input[type="time"] {
+            color-scheme: dark;
+        }
+
+        /* 3. MODE TERANG (Saat ada class 'light-mode') */
+        /* Kita paksa balik ke skema warna TERANG.
+       Otomatis browser mengubah icon jadi HITAM. */
+        body.light-mode input[type="date"],
+        body.light-mode input[type="time"] {
+            color-scheme: light;
         }
     </style>
 </head>
@@ -478,6 +503,27 @@ $totalNotif = $countBreakdown + $countOverdue;
                             <?php
                             $query = mysqli_query($conn, "SELECT * FROM tb_projects WHERE status='To Do' ORDER BY due_date ASC");
                             while ($row = mysqli_fetch_assoc($query)) {
+
+                                // --- AREA PEMBERSIH DATA (SISIPKAN DISINI) ---
+                                // 1. Ambil Data Mentah
+                                $raw_name = $row['project_name'];
+                                $raw_desc = $row['description'];
+                                $raw_act  = $row['activity'];
+
+                                // 2. Ganti Enter jadi "_ENTER_" & Escape Kutip
+                                $clean_name = str_replace(array("\r", "\n"), "_ENTER_", $raw_name);
+                                $clean_name = str_replace("'", "\'", $clean_name);
+
+                                $clean_desc = str_replace(array("\r", "\n"), "_ENTER_", $raw_desc);
+                                $clean_desc = str_replace("'", "\'", $clean_desc);
+
+                                $clean_act  = str_replace(array("\r", "\n"), "_ENTER_", $raw_act);
+                                $clean_act  = str_replace("'", "\'", $clean_act);
+
+                                // 3. Bungkus htmlspecialchars
+                                $clean_name = htmlspecialchars($clean_name, ENT_QUOTES);
+                                $clean_desc = htmlspecialchars($clean_desc, ENT_QUOTES);
+                                $clean_act  = htmlspecialchars($clean_act, ENT_QUOTES);
                             ?>
                                 <div class="bg-slate-800 p-4 rounded-lg border border-slate-700 shadow hover:border-indigo-500 transition cursor-pointer group">
                                     <div class="flex justify-between items-start mb-2">
@@ -493,12 +539,14 @@ $totalNotif = $countBreakdown + $countOverdue;
                                                 <?php if ($_SESSION['role'] == 'admin' || $_SESSION['role'] == 'section'): ?>
                                                     <button onclick="event.stopPropagation(); editProject(
                                                 '<?php echo $row['project_id']; ?>',
-                                                '<?php echo htmlspecialchars($row['project_name'], ENT_QUOTES); ?>',
-                                                '<?php echo htmlspecialchars($row['description'], ENT_QUOTES); ?>',
+                                                '<?php echo $clean_name; ?>',
+                                                '<?php echo $clean_desc; ?>',
+
                                                 '<?php echo $row['due_date']; ?>',
                                                 '<?php echo htmlspecialchars($row['category_badge'], ENT_QUOTES); ?>',
                                                 '<?php echo htmlspecialchars($row['team_members'], ENT_QUOTES); ?>',
-                                                '<?php echo htmlspecialchars($row['activity'], ENT_QUOTES); ?>',
+                                                '<?php echo $clean_act; ?>',
+
                                                 '<?php echo htmlspecialchars($row['plant'], ENT_QUOTES); ?>',
                                                 '<?php echo $row['status']; ?>'
                                             )" class="w-full text-left px-4 py-2 text-xs text-slate-300 hover:bg-blue-600 hover:text-white transition flex items-center gap-2">
@@ -784,7 +832,7 @@ $totalNotif = $countBreakdown + $countOverdue;
                         </div>
                         <div>
                             <label class="block text-xs text-slate-400 mb-1">Project Status</label>
-                            <select name="status" class="w-full bg-slate-950 border border-slate-700 text-white rounded px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none">
+                            <select name="status" class="w-full bg-slate-950 border border-slate-700 text-white rounded px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none" required>
                                 <option value="">-- Pilih --</option>
                                 <!-- <option value="In Progress" selected>In Progress</option> -->
                                 <option value="In Progress">In Progress</option>
@@ -1045,13 +1093,20 @@ $totalNotif = $countBreakdown + $countOverdue;
         // Kita harus memecah string "Budi, Andi" menjadi pilihan terseleksi
         function editProject(id, name, desc, date, cat, team, act, plant, status) {
             document.getElementById('edit_id').value = id;
-            document.getElementById('edit_name').value = name;
-            document.getElementById('edit_desc').value = desc;
+
+            // document.getElementById('edit_name').value = name;
+            // document.getElementById('edit_desc').value = desc;
+            document.getElementById('edit_name').value = name.split("_ENTER_").join("\n");
+            document.getElementById('edit_desc').value = desc.split("_ENTER_").join("\n");
+
             document.getElementById('edit_date').value = date;
 
             if (document.getElementById('edit_status')) document.getElementById('edit_status').value = status;
             if (document.getElementById('edit_cat')) document.getElementById('edit_cat').value = cat;
-            document.getElementById('edit_act').value = act;
+
+            // document.getElementById('edit_act').value = act;
+            document.getElementById('edit_act').value = act.split("_ENTER_").join(" ");
+
             document.getElementById('edit_plant').value = plant;
 
             // LOGIC MULTI SELECT (Load Data Lama)
