@@ -1,7 +1,6 @@
 <?php
 session_start();
 include 'config.php';
-
 if (!isset($_SESSION['user_id'])) {
     header("Location: index.php");
     exit();
@@ -53,18 +52,18 @@ $totalNotif = $countBreakdown + $countOverdue;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Master Items - Automation Portal</title>
+
     <link rel="icon" href="image/gajah_tunggal.png" type="image/png">
-
-    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+    
     <link rel="stylesheet" href="assets/css/layouts/sidebar.css">
     <link rel="stylesheet" href="assets/css/layouts/header.css">
     <link rel="stylesheet" href="assets/css/components/button.css">
     <link rel="stylesheet" href="assets/css/components/card.css">
     <link rel="stylesheet" href="assets/css/components/modal.css">
     <link rel="stylesheet" href="assets/css/main.css">
+    <script src="assets/vendor/tailwind.js"></script>
+    <script src="assets/vendor/sweetalert2.all.min.js"></script>
 
     <style>
         #modalItem:not(.hidden)>div:last-child>div {
@@ -171,6 +170,14 @@ $totalNotif = $countBreakdown + $countOverdue;
                 <?php if (isset($_SESSION['role']) && ($_SESSION['role'] == 'admin' || $_SESSION['role'] == 'section')): ?>
                     <a href="dashboard.php?open_modal=adduser" class="nav-item hover:text-emerald-400 transition"><i class="fa-solid fa-user-plus w-6"></i><span>Add User</span></a>
                 <?php endif; ?>
+
+                <?php if ($_SESSION['role'] == 'admin'): ?>
+                    <div class="px-4 py-2 text-xs font-bold text-slate-500 uppercase tracking-wider mt-4">Admin Menu</div>
+                    <a href="manage_users.php" class="nav-item">
+                        <i class="fas fa-users-cog w-6"></i> <span class="font-medium">User Management</span>
+                    </a>
+                <?php endif; ?>
+
                 <a href="logout.php" class="nav-item"><i class="fas fa-sign-out-alt w-6"></i><span>Logout</span></a>
             </nav>
 
@@ -374,16 +381,6 @@ $totalNotif = $countBreakdown + $countOverdue;
                     <?php endif; ?>
                 </div>
             </div>
-
-            <!-- <div class="mt-auto py-6 px-8 border-t border-slate-800/50 flex flex-col md:flex-row justify-between items-center gap-2">
-                <p class="text-[10px] text-slate-600 font-medium tracking-wide">
-                    &copy; <?php echo date('Y'); ?> JIS Automation Dept. <span class="hidden md:inline">- Internal Use Only.</span>
-                </p>
-                <p class="text-[10px] text-slate-600 font-medium tracking-wide flex items-center gap-1">
-                    Maintained by <span class="text-slate-500 hover:text-emerald-500 transition cursor-default">zaan</span>
-                    <i class="fas fa-code text-[8px] opacity-50"></i>
-                </p>
-            </div> -->
         </main>
     </div>
 

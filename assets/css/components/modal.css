@@ -6,7 +6,8 @@
 #modalEditAsset:not(.hidden) > div:last-child > div,
 #modalAddPart:not(.hidden) > div:last-child > div,
 #modalEditReport:not(.hidden) > div:last-child > div,
-#modalAddUser:not(.hidden) > div:last-child > div
+#modalAddUser:not(.hidden) > div:last-child > div,
+#modalEditUser:not(.hidden) > div:last-child > div
 {
     animation: popUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }

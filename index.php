@@ -18,10 +18,9 @@ if (isset($_SESSION['user_id'])) {
     <link rel="icon" href="image/gajah_tunggal.png" type="image/png">
     <title>Login - Automation & Management System</title>
 
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="assets/vendor/tailwind.js"></script>
+    <script src="assets/vendor/sweetalert2.all.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="assets/css/components/button.css">
     <link rel="stylesheet" href="assets/css/main.css">
 
@@ -71,7 +70,7 @@ if (isset($_SESSION['user_id'])) {
             <p class="text-sm text-slate-500 mt-1">Automation & Management System</p>
         </div>
 
-        <!-- <form id="loginForm" class="space-y-6"> -->
+        <!-- FORM LOGIN ADA DISINI -->
         <form action="auth.php" method="POST" class="space-y-6" id="loginForm">
             <div>
                 <label class="block text-xs font-medium text-slate-400 mb-1 uppercase tracking-wider">ID Number</label>
@@ -112,6 +111,7 @@ if (isset($_SESSION['user_id'])) {
             </div>
         </form>
 
+        <!-- FOOTER FORM LOGIN -->
         <div class="mt-6 text-center">
             <p class="text-xs text-slate-600">
                 &copy; 2025 JIS Automation Dept. Internal Use Only.
@@ -120,11 +120,9 @@ if (isset($_SESSION['user_id'])) {
     </div>
 
     <script>
-        // Script UI Saja: Ubah tombol jadi 'Loading...' saat diklik
         const loginForm = document.getElementById('loginForm');
         if (loginForm) {
             loginForm.addEventListener('submit', function(e) {
-                // JANGAN ada e.preventDefault(); biar form terkirim ke auth.php
 
                 const btn = this.querySelector('button[type="submit"]');
                 const originalText = btn.innerHTML;
@@ -132,35 +130,8 @@ if (isset($_SESSION['user_id'])) {
                 // Ubah tampilan tombol biar seolah-olah mikir
                 btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Verifying...';
                 btn.classList.add('opacity-75', 'cursor-not-allowed');
-                // btn.disabled = true; // Jangan disable dulu biar data terkirim
             });
         }
-
-        // FUNGSI LUPA PASSWORD
-        // function forgotPassword() {
-        //     Swal.fire({
-        //         icon: 'info',
-        //         title: 'Lupa Password?',
-        //         html: `
-        //             <p class="text-sm text-slate-300 mb-4">
-        //                 Karena sistem ini bersifat internal, silakan hubungi Administrator untuk melakukan reset password manual.
-        //             </p>
-        //             <div class="bg-slate-800 p-3 rounded-lg text-left border border-slate-700">
-        //                 <p class="text-xs text-slate-400 mb-1">Kontak Admin:</p>
-        //                 <div class="flex items-center gap-2 text-emerald-400 font-bold">
-        //                     <i class="fab fa-whatsapp"></i> 0812-3456-7890 (Pak Budi)
-        //                 </div>
-        //                 <div class="flex items-center gap-2 text-blue-400 font-bold mt-1">
-        //                     <i class="fas fa-envelope"></i> admin.automation@jis.com
-        //                 </div>
-        //             </div>
-        //         `,
-        //         background: '#1e293b', // Dark mode theme
-        //         color: '#fff',
-        //         confirmButtonText: 'Oke, Saya Paham',
-        //         confirmButtonColor: '#059669' // Emerald Green
-        //     });
-        // }
     </script>
 
     <?php

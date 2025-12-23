@@ -36,18 +36,17 @@ $totalNotif = $countBreakdown + $countOverdue;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Database Inventory - Automation Portal</title>
+
     <link rel="icon" href="image/gajah_tunggal.png" type="image/png">
-
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">  
     <link rel="stylesheet" href="assets/css/layouts/sidebar.css">
     <link rel="stylesheet" href="assets/css/layouts/header.css">
     <link rel="stylesheet" href="assets/css/components/button.css">
     <link rel="stylesheet" href="assets/css/components/card.css">
     <link rel="stylesheet" href="assets/css/components/modal.css">
     <link rel="stylesheet" href="assets/css/main.css">
+    <script src="assets/vendor/sweetalert2.all.min.js"></script>
+    <script src="assets/vendor/tailwind.js"></script>
 
     <style>
         @media print {
@@ -152,11 +151,16 @@ $totalNotif = $countBreakdown + $countOverdue;
                 </a>
 
                 <?php if ($_SESSION['role'] == 'admin' || $_SESSION['role'] == 'section'): ?>
-                    <!-- <a href="#" class="nav-item"> -->
-                    <!-- <a href="javascript:void(0)" onclick="openModal('modalAddUser')" class="nav-item hover:text-emerald-400 transition"> -->
                     <a href="dashboard.php?open_modal=adduser" class="nav-item hover:text-emerald-400 transition">
                         <i class="fa-solid fa-user-plus w-6"></i>
                         <span>Add User</span>
+                    </a>
+                <?php endif; ?>
+
+                <?php if ($_SESSION['role'] == 'admin'): ?>
+                    <div class="px-4 py-2 text-xs font-bold text-slate-500 uppercase tracking-wider mt-4">Admin Menu</div>
+                    <a href="manage_users.php" class="nav-item">
+                        <i class="fas fa-users-cog w-6"></i> <span class="font-medium">User Management</span>
                     </a>
                 <?php endif; ?>
 
@@ -451,16 +455,6 @@ $totalNotif = $countBreakdown + $countOverdue;
                     </div>
                 </div>
             </div>
-
-            <!-- <div class="mt-auto py-6 px-8 border-t border-slate-800/50 flex flex-col md:flex-row justify-between items-center gap-2">
-                <p class="text-[10px] text-slate-600 font-medium tracking-wide">
-                    &copy; <?php echo date('Y'); ?> JIS Automation Dept. <span class="hidden md:inline">- Internal Use Only.</span>
-                </p>
-                <p class="text-[10px] text-slate-600 font-medium tracking-wide flex items-center gap-1">
-                    Maintained by <span class="text-slate-500 hover:text-emerald-500 transition cursor-default">zaan</span>
-                    <i class="fas fa-code text-[8px] opacity-50"></i>
-                </p>
-            </div> -->
         </main>
     </div>
 
@@ -1060,36 +1054,78 @@ $totalNotif = $countBreakdown + $countOverdue;
         }
     </script>
 
-    <nav class="fixed bottom-0 left-0 w-full bg-slate-950 border-t border-slate-800 flex justify-around items-center py-3 z-50 md:hidden safe-area-pb">
+<button onclick="toggleMobileMenu()" id="mobileMenuBtn" class="fixed bottom-24 right-4 z-[60] md:hidden bg-emerald-600/50 text-white w-12 h-12 rounded-full shadow-lg shadow-emerald-900/50 flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 border-1 border-slate-900">
+    <i id="iconOpen" class="fas fa-bars text-lg"></i>
+    <i id="iconClose" class="fas fa-times text-lg hidden"></i>
+</button>
 
-        <?php $page = basename($_SERVER['PHP_SELF']); ?>
+<nav id="mobileNavbar" class="fixed bottom-4 left-4 right-4 bg-slate-900/90 backdrop-blur-md border border-slate-700 rounded-2xl flex justify-around items-center py-3 z-50 md:hidden transition-transform duration-300 ease-in-out translate-y-[150%] shadow-2xl">
 
-        <a href="dashboard.php" class="flex flex-col items-center gap-1 w-1/5 transition <?php echo ($page == 'dashboard.php') ? 'text-emerald-400' : 'text-slate-500 hover:text-slate-300'; ?>">
-            <i class="fas fa-tachometer-alt text-xl mb-0.5"></i>
-            <span class="text-[9px] font-medium uppercase tracking-wide">Home</span>
-        </a>
+    <?php $page = basename($_SERVER['PHP_SELF']); ?>
 
-        <a href="database.php" class="flex flex-col items-center gap-1 w-1/5 transition <?php echo ($page == 'database.php' || $page == 'master_items.php') ? 'text-emerald-400' : 'text-slate-500 hover:text-slate-300'; ?>">
-            <i class="fas fa-database text-xl mb-0.5"></i>
-            <span class="text-[9px] font-medium uppercase tracking-wide">Database</span>
-        </a>
+    <a href="dashboard.php" class="flex flex-col items-center gap-1 w-1/5 transition group <?php echo ($page == 'dashboard.php') ? 'text-emerald-400' : 'text-slate-400 hover:text-emerald-300'; ?>">
+        <i class="fas fa-tachometer-alt text-lg mb-0.5 group-active:scale-90 transition"></i>
+        <span class="text-[9px] font-medium uppercase tracking-wide">Home</span>
+    </a>
 
-        <a href="laporan.php" class="flex flex-col items-center gap-1 w-1/5 transition <?php echo ($page == 'laporan.php' || $page == 'my_laporan.php') ? 'text-emerald-400' : 'text-slate-500 hover:text-slate-300'; ?>">
-            <i class="fas fa-clipboard-list text-xl mb-0.5"></i>
-            <span class="text-[9px] font-medium uppercase tracking-wide">Report</span>
-        </a>
+    <a href="database.php" class="flex flex-col items-center gap-1 w-1/5 transition group <?php echo ($page == 'database.php' || $page == 'master_items.php') ? 'text-emerald-400' : 'text-slate-400 hover:text-emerald-300'; ?>">
+        <i class="fas fa-database text-lg mb-0.5 group-active:scale-90 transition"></i>
+        <span class="text-[9px] font-medium uppercase tracking-wide">Database</span>
+    </a>
 
-        <a href="project.php" class="flex flex-col items-center gap-1 w-1/5 transition <?php echo ($page == 'project.php') ? 'text-emerald-400' : 'text-slate-500 hover:text-slate-300'; ?>">
-            <i class="fas fa-project-diagram text-xl mb-0.5"></i>
-            <span class="text-[9px] font-medium uppercase tracking-wide">Projects</span>
-        </a>
+    <a href="laporan.php" class="flex flex-col items-center gap-1 w-1/5 transition group <?php echo ($page == 'laporan.php' || $page == 'my_laporan.php') ? 'text-emerald-400' : 'text-slate-400 hover:text-emerald-300'; ?>">
+        <i class="fas fa-clipboard-list text-lg mb-0.5 group-active:scale-90 transition"></i>
+        <span class="text-[9px] font-medium uppercase tracking-wide">Report</span>
+    </a>
 
-        <a href="logout.php" class="flex flex-col items-center gap-1 w-1/5 text-slate-500 hover:text-red-400 transition">
-            <i class="fas fa-sign-out-alt text-xl mb-0.5"></i>
-            <span class="text-[9px] font-medium uppercase tracking-wide">Logout</span>
-        </a>
+    <a href="project.php" class="flex flex-col items-center gap-1 w-1/5 transition group <?php echo ($page == 'project.php') ? 'text-emerald-400' : 'text-slate-400 hover:text-emerald-300'; ?>">
+        <i class="fas fa-project-diagram text-lg mb-0.5 group-active:scale-90 transition"></i>
+        <span class="text-[9px] font-medium uppercase tracking-wide">Projects</span>
+    </a>
 
-    </nav>
+    <a href="logout.php" class="flex flex-col items-center gap-1 w-1/5 text-slate-500 hover:text-red-400 transition group">
+        <i class="fas fa-sign-out-alt text-lg mb-0.5 group-active:scale-90 transition"></i>
+        <span class="text-[9px] font-medium uppercase tracking-wide">Logout</span>
+    </a>
+
+</nav>
+<script>
+    function toggleMobileMenu() {
+        const navbar = document.getElementById('mobileNavbar');
+        const iconOpen = document.getElementById('iconOpen');
+        const iconClose = document.getElementById('iconClose');
+        const btn = document.getElementById('mobileMenuBtn');
+
+        // Toggle Class untuk menampilkan/menyembunyikan Navbar
+        // translate-y-[150%] artinya geser ke bawah sejauh 150% dari tingginya (ngumpet)
+        // translate-y-0 artinya kembali ke posisi asal (muncul)
+        if (navbar.classList.contains('translate-y-[150%]')) {
+            // MUNCULKAN MENU
+            navbar.classList.remove('translate-y-[150%]');
+            navbar.classList.add('translate-y-0');
+            
+            // Ubah Icon jadi X
+            iconOpen.classList.add('hidden');
+            iconClose.classList.remove('hidden');
+
+            // Ubah warna tombol jadi merah (biar kelihatan tombol close)
+            btn.classList.remove('bg-emerald-600');
+            btn.classList.add('bg-slate-700');
+        } else {
+            // SEMBUNYIKAN MENU
+            navbar.classList.add('translate-y-[150%]');
+            navbar.classList.remove('translate-y-0');
+            
+            // Ubah Icon jadi Hamburger
+            iconOpen.classList.remove('hidden');
+            iconClose.classList.add('hidden');
+
+            // Balikin warna tombol
+            btn.classList.add('bg-emerald-600');
+            btn.classList.remove('bg-slate-700');
+        }
+    }
+</script>
 </body>
 
 </html>

@@ -18,6 +18,7 @@ $msg = isset($_GET['msg']) ? $_GET['msg'] : '';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manajemen User - Admin Panel</title>
+
     <link rel="icon" href="image/gajah_tunggal.png" type="image/png">
     <link rel="stylesheet" href="assets/css/layouts/sidebar.css">
     <link rel="stylesheet" href="assets/css/layouts/header.css">
@@ -25,9 +26,9 @@ $msg = isset($_GET['msg']) ? $_GET['msg'] : '';
     <link rel="stylesheet" href="assets/css/components/card.css">
     <link rel="stylesheet" href="assets/css/components/modal.css">
     <link rel="stylesheet" href="assets/css/main.css">
-    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="assets/vendor/tailwind.js"></script>
+    <script src="assets/vendor/sweetalert2.all.min.js"></script>
 
     <style>
         .custom-scroll::-webkit-scrollbar {
@@ -67,11 +68,11 @@ $msg = isset($_GET['msg']) ? $_GET['msg'] : '';
 
         <aside id="sidebar" class="w-64 bg-slate-950 border-r border-slate-800 flex flex-col transition-all duration-300 hidden md:flex">
             <div class="h-16 flex items-center justify-center border-b border-slate-800">
-                <h1 class="text-xl font-bold text-white tracking-wide">JIS <span class="text-emerald-400">ADMIN.</span></h1>
+                <h1 class="text-xl font-bold text-white tracking-wide">JIS <span class="text-emerald-400">PORTAL.</span></h1>
             </div>
 
             <nav class="flex-1 px-4 py-6 space-y-2">
-                <a href="#" class="nav-item active">
+                <a href="dashboard.php" class="nav-item">
                     <i class="fas fa-tachometer-alt w-6"></i>
                     <span class="font-medium">Dashboard</span>
                 </a>
@@ -106,7 +107,6 @@ $msg = isset($_GET['msg']) ? $_GET['msg'] : '';
                 </a>
 
                 <?php if ($_SESSION['role'] == 'admin' || $_SESSION['role'] == 'section'): ?>
-                    <!-- <a href="#" class="nav-item"> -->
                     <a href="javascript:void(0)" onclick="openModal('modalAddUser')" class="nav-item hover:text-emerald-400 transition">
                         <i class="fa-solid fa-user-plus w-6"></i>
                         <span>Add User</span>
@@ -115,7 +115,7 @@ $msg = isset($_GET['msg']) ? $_GET['msg'] : '';
 
                 <?php if ($_SESSION['role'] == 'admin'): ?>
                     <div class="px-4 py-2 text-xs font-bold text-slate-500 uppercase tracking-wider mt-4">Admin Menu</div>
-                    <a href="manage_users.php" class="flex items-center gap-3 px-4 py-3 bg-emerald-600/10 text-emerald-400 border border-emerald-500/20 rounded-lg transition">
+                        <a href="manage_users.php" class="nav-item active">
                         <i class="fas fa-users-cog w-6"></i> <span class="font-medium">User Management</span>
                     </a>
                 <?php endif; ?>
@@ -127,16 +127,29 @@ $msg = isset($_GET['msg']) ? $_GET['msg'] : '';
             </nav>
 
             <div class="p-4 border-t border-slate-800">
-                <a href="logout.php" class="flex items-center gap-3 text-slate-400 hover:text-red-400 transition text-sm">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </a>
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-slate-700 border border-slate-500 overflow-hidden flex items-center justify-center">
+                        <img src="image/default_profile.png"
+                            alt="User Profile"
+                            class="w-full h-full object-cover scale-125 transition-transform hover:scale-150">
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-white">
+                            <?php echo isset($_SESSION['full_name']) ? $_SESSION['full_name'] : 'Guest'; ?>
+                        </p>
+                        <p class="text-xs text-emerald-500">Online</p>
+                    </div>
+                </div>
             </div>
+
         </aside>
 
-        <main class="flex-1 flex flex-col overflow-y-auto relative pb-24">
-            <header class="h-16 bg-slate-900/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-10 px-8 flex items-center justify-between">
+        <main class="flex-1 flex flex-col overflow-y-auto relative pb-24" id="main-content">
+            <header class="h-16 shrink-0 bg-slate-900/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-10 px-8 flex items-center justify-between">
                 <div class="flex items-center gap-4">
-                    <h2 class="text-lg font-medium text-white">System User Management</h2>
+                    <button id="sidebarToggle" class="text-slate-400 hover:text-white mr-4 transition-transform active:scale-95">
+                    </button>
+                    <h1 class="text-lg font-medium text-white">System User Management</h1>
                 </div>
                 <button onclick="openModal('modalAddUser')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-lg shadow-emerald-600/20 flex items-center gap-2">
                     <i class="fas fa-plus"></i> Tambah User
@@ -156,7 +169,7 @@ $msg = isset($_GET['msg']) ? $_GET['msg'] : '';
                     <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 flex items-center gap-4 shadow-lg">
                         <div class="w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-xl"><i class="fas fa-users"></i></div>
                         <div>
-                            <h3 class="text-2xl font-bold text-white"><?php echo $totalUser; ?></h3>
+                            <h3 class="text-2xl font-bold text-white"><?php echo $totalUser - 1; ?></h3>
                             <p class="text-xs text-slate-400 uppercase tracking-wider">Total Users</p>
                         </div>
                     </div>
@@ -164,7 +177,7 @@ $msg = isset($_GET['msg']) ? $_GET['msg'] : '';
                     <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 flex items-center gap-4 shadow-lg">
                         <div class="w-12 h-12 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center text-xl"><i class="fas fa-user-shield"></i></div>
                         <div>
-                            <h3 class="text-2xl font-bold text-white"><?php echo $adminCount; ?></h3>
+                            <h3 class="text-2xl font-bold text-white"><?php echo $adminCount - 1; ?></h3>
                             <p class="text-xs text-slate-400 uppercase tracking-wider">Administrators</p>
                         </div>
                     </div>
@@ -186,12 +199,13 @@ $msg = isset($_GET['msg']) ? $_GET['msg'] : '';
                                     <th class="px-6 py-4">User Profile</th>
                                     <th class="px-6 py-4">Username (NIK)</th>
                                     <th class="px-6 py-4">Role</th>
+                                    <th class="px-6 py-4">Last Login</th>
                                     <th class="px-6 py-4 text-center">Actions</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-700/50">
                                 <?php
-                                $q = mysqli_query($conn, "SELECT * FROM tb_users ORDER BY role ASC, full_name ASC");
+                                $q = mysqli_query($conn, "SELECT * FROM tb_users WHERE username != 'admin' ORDER BY role ASC, full_name ASC");
                                 while ($row = mysqli_fetch_assoc($q)) {
                                     // Warna Badge Role
                                     $roleBadge = 'bg-slate-700 text-slate-300';
@@ -223,6 +237,11 @@ $msg = isset($_GET['msg']) ? $_GET['msg'] : '';
                                                 <?php echo $row['role']; ?>
                                             </span>
                                         </td>
+                                        <td class="px-6 py-4">
+                                            <span class="<?php echo $roleBadge; ?> px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wide">
+                                                <?php echo $row['last_login']; ?>
+                                            </span>
+                                        </td>
                                         <td class="px-6 py-4 text-center">
                                             <div class="flex items-center justify-center gap-2">
                                                 <button onclick="editUser('<?php echo $row['user_id']; ?>', '<?php echo $row['username']; ?>', '<?php echo $row['full_name']; ?>', '<?php echo $row['short_name']; ?>', '<?php echo $row['role']; ?>')"
@@ -235,7 +254,7 @@ $msg = isset($_GET['msg']) ? $_GET['msg'] : '';
                                                     <i class="fas fa-key text-xs"></i>
                                                 </button>
 
-                                                <?php if ($row['username'] != 'admin'): // Admin utama tidak boleh dihapus 
+                                                <?php if ($row['username'] != 'admin' ): // Admin utama tidak boleh dihapus 
                                                 ?>
                                                     <button onclick="deleteUser('<?php echo $row['user_id']; ?>', '<?php echo $row['full_name']; ?>')"
                                                         class="w-8 h-8 rounded bg-slate-700 hover:bg-red-600 text-slate-300 hover:text-white transition flex items-center justify-center" title="Hapus User">
@@ -254,6 +273,7 @@ $msg = isset($_GET['msg']) ? $_GET['msg'] : '';
         </main>
     </div>
 
+    <!-- MODAL ADD USER -->
     <div id="modalAddUser" class="fixed inset-0 z-50 hidden">
         <div class="absolute inset-0 bg-black/70 backdrop-blur-sm transition-opacity" onclick="closeModal('modalAddUser')"></div>
         <div class="relative flex items-center justify-center min-h-screen p-4">
@@ -273,25 +293,26 @@ $msg = isset($_GET['msg']) ? $_GET['msg'] : '';
                         <input type="text" name="username" placeholder="Cth: 23-4567" class="w-full bg-slate-950 border border-slate-700 text-white rounded px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none" required>
                     </div>
                     <div>
-                        <label class="block text-xs text-slate-400 mb-1 font-medium">Default Password</label>
+                        <label class="block text-xs text-slate-400 mb-1 font-medium">Password</label>
                         <input type="password" name="password" placeholder="******" class="w-full bg-slate-950 border border-slate-700 text-white rounded px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none" required>
                     </div>
                     <div>
                         <label class="block text-xs text-slate-400 mb-1 font-medium">Full Name</label>
-                        <input type="text" name="full_name" placeholder="Nama Lengkap" class="w-full bg-slate-950 border border-slate-700 text-white rounded px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none" required>
+                        <input type="text" name="full_name" placeholder="Contoh : Faozan Nur Amanulloh" class="w-full bg-slate-950 border border-slate-700 text-white rounded px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none" required>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs text-slate-400 mb-1 font-medium">Short Name</label>
-                            <input type="text" name="short_name" placeholder="Panggilan" class="w-full bg-slate-950 border border-slate-700 text-white rounded px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none" required>
+                            <label class="block text-xs text-slate-400 mb-1 font-medium">Short Name (Panggilan)</label>
+                            <input type="text" name="short_name" placeholder="Contoh : Faozan" class="w-full bg-slate-950 border border-slate-700 text-white rounded px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none" required>
+                        <p class="text-[10px] text-slate-500 mt-1">*Digunakan untuk dropdown list team.</p>
                         </div>
                         <div>
-                            <label class="block text-xs text-slate-400 mb-1 font-medium">Role</label>
+                            <label class="block text-xs text-slate-400 mb-1 font-medium">Role / Jabatan</label>
                             <select name="role" class="w-full bg-slate-950 border border-slate-700 text-white rounded px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none">
+                                <option value="-">--Pilih--</option>
                                 <option value="worker">Worker</option>
                                 <option value="officer">Officer</option>
                                 <option value="section">Section</option>
-                                <option value="admin">Admin</option>
                             </select>
                         </div>
                     </div>
@@ -431,6 +452,8 @@ $msg = isset($_GET['msg']) ? $_GET['msg'] : '';
             });
         }
     </script>
+        <script src="assets/js/ui-sidebar.js"></script>
+    <script src="assets/js/ui-modal.js"></script>
 
 </body>
 

@@ -8,8 +8,6 @@ if (!isset($_SESSION['user_id'])) {
     exit(); // Stop script di sini, jangan lanjut ke bawah!
 }
 include 'config.php';
-// $queryUsers = mysqli_query($conn, "SELECT short_name FROM tb_users WHERE short_name IS NOT NULL AND short_name != ''");
-// Tambahkan: AND role != 'admin'
 $queryUsers = mysqli_query($conn, "SELECT short_name FROM tb_users WHERE short_name IS NOT NULL AND short_name != '' AND role != 'admin'");
 $teamList = [];
 while ($u = mysqli_fetch_assoc($queryUsers)) {
@@ -22,8 +20,6 @@ $ganttData = [];
 
 while ($r = mysqli_fetch_assoc($qChart)) {
     // 1. Tentukan Start Date
-    // Karena kita tidak punya kolom 'start_date', kita asumsikan start = created_at
-    // Jika created_at kosong, kita mundur 7 hari dari due_date (Logika estimasi)
     $start = !empty($r['created_at']) ? strtotime($r['created_at']) : strtotime($r['due_date'] . ' -7 days');
     $end   = strtotime($r['due_date']);
 
@@ -67,22 +63,22 @@ $totalNotif = $countBreakdown + $countOverdue;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Project Management - Automation Portal</title>
+
     <link rel="icon" href="image/gajah_tunggal.png" type="image/png">
-
-    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
     <link rel="stylesheet" href="assets/css/layouts/sidebar.css">
     <link rel="stylesheet" href="assets/css/layouts/header.css">
     <link rel="stylesheet" href="assets/css/components/button.css">
     <link rel="stylesheet" href="assets/css/components/card.css">
     <link rel="stylesheet" href="assets/css/components/modal.css">
     <link rel="stylesheet" href="assets/css/main.css">
-    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="assets/vendor/tom-select.css" rel="stylesheet">
+    <script src="assets/vendor/tailwind.js"></script>
+    <script src="assets/vendor/tom-select.complete.min.js"></script>
+    <script defer src="assets/vendor/alpine.js"></script>
+    <script src="assets/vendor/apexcharts.js"></script>
+    <script src="assets/vendor/sweetalert2.all.min.js"></script>
+
     <style>
         /* Kita paksa animasi jalan untuk Modal Project */
         #modalProject:not(.hidden)>div:last-child>div {
@@ -151,8 +147,6 @@ $totalNotif = $countBreakdown + $countOverdue;
     </style>
 
     <style>
-        /* ... css lainnya ... */
-
         /* Animasi Dropdown Project Menu */
         .project-menu {
             transform-origin: top right;
@@ -180,17 +174,13 @@ $totalNotif = $countBreakdown + $countOverdue;
             cursor: pointer;
         }
 
-        /* 2. MODE GELAP (DEFAULT di Website Bapak) */
-        /* Kita paksa elemen date/time menggunakan skema warna GELAP.
-       Otomatis browser akan mengubah icon jadi PUTIH. */
+        /* 2. MODE GELAP */
         input[type="date"],
         input[type="time"] {
             color-scheme: dark;
         }
 
         /* 3. MODE TERANG (Saat ada class 'light-mode') */
-        /* Kita paksa balik ke skema warna TERANG.
-       Otomatis browser mengubah icon jadi HITAM. */
         body.light-mode input[type="date"],
         body.light-mode input[type="time"] {
             color-scheme: light;
@@ -207,6 +197,7 @@ $totalNotif = $countBreakdown + $countOverdue;
                 <h1 class="text-xl font-bold text-white tracking-wide">JIS <span class="text-emerald-400">PORTAL.</span></h1>
             </div>
 
+            <!-- SIDEBAR ADA DISINI -->
             <nav class="flex-1 px-4 py-6 space-y-2">
                 <a href="dashboard.php" class="nav-item">
                     <i class="fas fa-tachometer-alt w-6"></i>
@@ -248,12 +239,20 @@ $totalNotif = $countBreakdown + $countOverdue;
                     </a>
                 <?php endif; ?>
 
+                <?php if ($_SESSION['role'] == 'admin'): ?>
+                    <div class="px-4 py-2 text-xs font-bold text-slate-500 uppercase tracking-wider mt-4">Admin Menu</div>
+                    <a href="manage_users.php" class="nav-item">
+                        <i class="fas fa-users-cog w-6"></i> <span class="font-medium">User Management</span>
+                    </a>
+                <?php endif; ?>
+
                 <a href="logout.php" class="nav-item">
                     <i class="fas fa-solid fa-right-from-bracket w-6"></i>
                     <span>Logout</span>
                 </a>
             </nav>
 
+            <!-- USER PROFILE ADA DISINI -->
             <div class="p-4 border-t border-slate-800">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-full bg-slate-700 border border-slate-500 overflow-hidden flex items-center justify-center">
@@ -279,6 +278,8 @@ $totalNotif = $countBreakdown + $countOverdue;
                     </button>
                     <h2 class="text-lg font-medium text-white">Project Timeline</h2>
                 </div>
+
+                <!-- TOPBAR ADA DISINI -->
                 <div class="flex items-center gap-4">
                     <?php if ($_SESSION['role'] == 'admin' || $_SESSION['role'] == 'section'): ?>
                         <button id="btnNewProject" onclick="openModal('modalProject')" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-1.5 rounded-full text-sm font-medium transition shadow-lg shadow-indigo-600/20 flex items-center gap-2">
@@ -307,10 +308,6 @@ $totalNotif = $countBreakdown + $countOverdue;
 
                             <div class="max-h-80 overflow-y-auto custom-scroll">
                                 <?php if ($totalNotif == 0): ?>
-                                    <!-- <div class="px-4 py-6 text-center text-slate-500">
-                                        <i class="fas fa-check-circle text-2xl mb-2 text-emerald-500/50"></i>
-                                        <p class="text-xs">Semua sistem aman.</p>
-                                    </div> -->
                                     <div class="p-4 space-y-4 overflow-y-auto custom-scroll h-full">
                                         <?php
                                         // Query Done
@@ -361,9 +358,6 @@ $totalNotif = $countBreakdown + $countOverdue;
                                                 <p class="text-xs text-slate-500 mb-3 line-clamp-1"><?php echo $row['description']; ?></p>
 
                                                 <div class="flex justify-between items-center border-t border-slate-700 pt-2">
-                                                    <!-- <span class="text-[10px] text-emerald-500 font-bold flex items-center gap-1">
-                                        <i class="fas fa-check-circle"></i> Selesai
-                                    </span> -->
                                                     <div class="p-4 space-y-4 overflow-y-auto custom-scroll h-full">
                                                         <?php
                                                         // Query Done
@@ -641,10 +635,6 @@ $totalNotif = $countBreakdown + $countOverdue;
                                     </div>
                                     <h4 class="text-white font-medium mb-1 group-hover:text-blue-400 transition"><?php echo $row['project_name']; ?></h4>
                                     <p class="text-xs text-slate-400 mb-3 line-clamp-2"><?php echo $row['description']; ?></p>
-
-                                    <!-- <div class="w-full bg-slate-700 h-1.5 rounded-full mb-3">
-                                        <div class="<?php echo $barColor; ?> h-1.5 rounded-full" style="width: <?php echo $pct; ?>%"></div>
-                                    </div> -->
                                     <div class="mb-3">
                                         <div class="flex justify-between items-center mb-1">
                                             <span class="text-[10px] text-slate-500">Progress</span>
@@ -759,16 +749,6 @@ $totalNotif = $countBreakdown + $countOverdue;
                     </div>
                 </div>
             </div>
-
-            <!-- <div class="mt-auto py-6 px-8 border-t border-slate-800/50 flex flex-col md:flex-row justify-between items-center gap-2">
-                <p class="text-[10px] text-slate-600 font-medium tracking-wide">
-                    &copy; <?php echo date('Y'); ?> JIS Automation Dept. <span class="hidden md:inline">- Internal Use Only.</span>
-                </p>
-                <p class="text-[10px] text-slate-600 font-medium tracking-wide flex items-center gap-1">
-                    Maintained by <span class="text-slate-500 hover:text-emerald-500 transition cursor-default">zaan</span>
-                    <i class="fas fa-code text-[8px] opacity-50"></i>
-                </p>
-            </div> -->
         </main>
     </div>
 
@@ -883,7 +863,6 @@ $totalNotif = $countBreakdown + $countOverdue;
 
                     <div class="grid grid-cols-2 gap-4">
                         <div><label class="block text-xs text-slate-400 mb-1">Plant</label>
-                            <!-- <input type="text" name="plant" id="edit_plant" class="w-full bg-slate-950 border border-slate-700 text-white rounded px-3 py-2 text-sm"> -->
                             <select name="plant" id="edit_plant" class="w-full bg-slate-950 border border-slate-700 text-white rounded px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none">
                                 <option value="PLANT A">PLANT A</option>
                                 <option value="PLANT BCHIT">PLANT BCHIT</option>
@@ -894,7 +873,6 @@ $totalNotif = $countBreakdown + $countOverdue;
                                 <!-- <option value="PLANT DUMMY">PLANT DUMMY</option> -->
                             </select>
                         </div>
-                        <!-- <div><label class="block text-xs text-slate-400 mb-1">Category</label><select name="category" id="edit_cat" class="w-full bg-slate-950 border border-slate-700 text-white rounded px-3 py-2 text-sm"><option>Upgrade</option><option>Installation</option><option>Maintenance</option></select></div> -->
                         <div>
                             <label class="block text-xs text-slate-400 mb-1">Project Status</label>
                             <select name="status" id="edit_status" class="w-full bg-slate-950 border border-slate-700 text-white rounded px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none">
@@ -910,7 +888,6 @@ $totalNotif = $countBreakdown + $countOverdue;
 
                     <div class="grid grid-cols-2 gap-4">
                         <div><label class="block text-xs text-slate-400 mb-1">Activity (Status)</label>
-                            <!-- <input type="text" name="activity" id="edit_act" class="w-full bg-slate-950 border border-slate-700 text-white rounded px-3 py-2 text-sm" placeholder="Installation, Fabrication..."> -->
                             <select name="activity" id="edit_act" class="w-full bg-slate-950 border border-slate-700 text-white rounded px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none">
                                 <option value="Not Start">Not Start</option>
                                 <option value="Meeting & Discussion">Meeting & Discussion</option>
@@ -925,7 +902,6 @@ $totalNotif = $countBreakdown + $countOverdue;
                     </div>
 
                     <div><label class="block text-xs text-slate-400 mb-1">Team Members</label>
-                        <!-- <input type="text" name="team" id="edit_team" class="w-full bg-slate-950 border border-slate-700 text-white rounded px-3 py-2 text-sm"> -->
                         <select name="team[]" id="edit_team" multiple placeholder="Pilih Tim..." autocomplete="off" class="w-full bg-slate-950 border border-slate-700 text-white rounded px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none">
                             <option value="">-- Pilih Lead Engineer --</option>
                             <?php
@@ -939,7 +915,6 @@ $totalNotif = $countBreakdown + $countOverdue;
 
                     <div class="pt-4 flex gap-3 border-t border-slate-800">
                         <button type="button" onclick="closeModal('modalEditProject')" class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-sm">Batal</button>
-                        <!-- <button type="button" onclick="closeModal('modalEditProject')" class="flex-1 py-2.5 bg-slate-800 text-slate-300 rounded-lg text-sm">Batal</button> -->
                         <button type="submit" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-medium shadow-lg">Update Project</button>
                     </div>
                 </form>
@@ -1233,73 +1208,79 @@ $totalNotif = $countBreakdown + $countOverdue;
         });
     </script>
 
-    <!-- <nav class="fixed bottom-0 left-0 w-full bg-slate-950 border-t border-slate-800 flex justify-around items-center py-3 z-50 md:hidden safe-area-pb">
+<button onclick="toggleMobileMenu()" id="mobileMenuBtn" class="fixed bottom-24 right-4 z-[60] md:hidden bg-emerald-600/50 text-white w-12 h-12 rounded-full shadow-lg shadow-emerald-900/50 flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 border-1 border-slate-900">
+    <i id="iconOpen" class="fas fa-bars text-lg"></i>
+    <i id="iconClose" class="fas fa-times text-lg hidden"></i>
+</button>
 
-        <?php $page = basename($_SERVER['PHP_SELF']); ?>
+<nav id="mobileNavbar" class="fixed bottom-4 left-4 right-4 bg-slate-900/90 backdrop-blur-md border border-slate-700 rounded-2xl flex justify-around items-center py-3 z-50 md:hidden transition-transform duration-300 ease-in-out translate-y-[150%] shadow-2xl">
 
-        <a href="dashboard.php" class="flex flex-col items-center gap-1 transition <?php echo ($page == 'dashboard.php') ? 'text-emerald-400' : 'text-slate-500 hover:text-slate-300'; ?>">
-            <i class="fas fa-tachometer-alt text-lg"></i>
-            <span class="text-[10px] font-medium">Dashboard</span>
-        </a>
+    <?php $page = basename($_SERVER['PHP_SELF']); ?>
 
-        <a href="database.php" class="flex flex-col items-center gap-1 transition <?php echo ($page == 'database.php') ? 'text-emerald-400' : 'text-slate-500 hover:text-slate-300'; ?>">
-            <i class="fas fa-microchip text-lg"></i>
-            <span class="text-[10px] font-medium">Part</span>
-        </a>
+    <a href="dashboard.php" class="flex flex-col items-center gap-1 w-1/5 transition group <?php echo ($page == 'dashboard.php') ? 'text-emerald-400' : 'text-slate-400 hover:text-emerald-300'; ?>">
+        <i class="fas fa-tachometer-alt text-lg mb-0.5 group-active:scale-90 transition"></i>
+        <span class="text-[9px] font-medium uppercase tracking-wide">Home</span>
+    </a>
 
-        <a href="laporan.php" class="flex flex-col items-center gap-1 transition <?php echo ($page == 'laporan.php') ? 'text-emerald-400' : 'text-slate-500 hover:text-slate-300'; ?>">
-            <i class="fas fa-clipboard-list text-lg"></i>
-            <span class="text-[10px] font-medium">Report</span>
-        </a>
+    <a href="database.php" class="flex flex-col items-center gap-1 w-1/5 transition group <?php echo ($page == 'database.php' || $page == 'master_items.php') ? 'text-emerald-400' : 'text-slate-400 hover:text-emerald-300'; ?>">
+        <i class="fas fa-database text-lg mb-0.5 group-active:scale-90 transition"></i>
+        <span class="text-[9px] font-medium uppercase tracking-wide">Database</span>
+    </a>
 
-        <a href="project.php" class="flex flex-col items-center gap-1 transition <?php echo ($page == 'project.php') ? 'text-emerald-400' : 'text-slate-500 hover:text-slate-300'; ?>">
-            <i class="fas fa-project-diagram text-lg"></i>
-            <span class="text-[10px] font-medium">Project</span>
-        </a>
+    <a href="laporan.php" class="flex flex-col items-center gap-1 w-1/5 transition group <?php echo ($page == 'laporan.php' || $page == 'my_laporan.php') ? 'text-emerald-400' : 'text-slate-400 hover:text-emerald-300'; ?>">
+        <i class="fas fa-clipboard-list text-lg mb-0.5 group-active:scale-90 transition"></i>
+        <span class="text-[9px] font-medium uppercase tracking-wide">Report</span>
+    </a>
 
-        <?php if (isset($_SESSION['role']) && ($_SESSION['role'] == 'admin' || $_SESSION['role'] == 'section')): ?>
-            <a href="dashboard.php?open_modal=adduser" class="flex flex-col items-center gap-1 text-slate-500 hover:text-emerald-400 transition">
-                <i class="fa-solid fa-user-plus text-lg"></i>
-                <span class="text-[10px] font-medium">Add User</span>
-            </a>
-        <?php endif; ?>
+    <a href="project.php" class="flex flex-col items-center gap-1 w-1/5 transition group <?php echo ($page == 'project.php') ? 'text-emerald-400' : 'text-slate-400 hover:text-emerald-300'; ?>">
+        <i class="fas fa-project-diagram text-lg mb-0.5 group-active:scale-90 transition"></i>
+        <span class="text-[9px] font-medium uppercase tracking-wide">Projects</span>
+    </a>
 
-        <a href="logout.php" class="flex flex-col items-center gap-1 text-slate-500 hover:text-red-400 transition">
-            <i class="fas fa-sign-out-alt text-lg"></i>
-            <span class="text-[10px] font-medium">Logout</span>
-        </a>
-    </nav> -->
+    <a href="logout.php" class="flex flex-col items-center gap-1 w-1/5 text-slate-500 hover:text-red-400 transition group">
+        <i class="fas fa-sign-out-alt text-lg mb-0.5 group-active:scale-90 transition"></i>
+        <span class="text-[9px] font-medium uppercase tracking-wide">Logout</span>
+    </a>
 
-    <nav class="fixed bottom-0 left-0 w-full bg-slate-950 border-t border-slate-800 flex justify-around items-center py-3 z-50 md:hidden safe-area-pb">
+</nav>
 
-        <?php $page = basename($_SERVER['PHP_SELF']); ?>
+<script>
+    function toggleMobileMenu() {
+        const navbar = document.getElementById('mobileNavbar');
+        const iconOpen = document.getElementById('iconOpen');
+        const iconClose = document.getElementById('iconClose');
+        const btn = document.getElementById('mobileMenuBtn');
 
-        <a href="dashboard.php" class="flex flex-col items-center gap-1 w-1/5 transition <?php echo ($page == 'dashboard.php') ? 'text-emerald-400' : 'text-slate-500 hover:text-slate-300'; ?>">
-            <i class="fas fa-tachometer-alt text-xl mb-0.5"></i>
-            <span class="text-[9px] font-medium uppercase tracking-wide">Home</span>
-        </a>
+        // Toggle Class untuk menampilkan/menyembunyikan Navbar
+        // translate-y-[150%] artinya geser ke bawah sejauh 150% dari tingginya (ngumpet)
+        // translate-y-0 artinya kembali ke posisi asal (muncul)
+        if (navbar.classList.contains('translate-y-[150%]')) {
+            // MUNCULKAN MENU
+            navbar.classList.remove('translate-y-[150%]');
+            navbar.classList.add('translate-y-0');
+            
+            // Ubah Icon jadi X
+            iconOpen.classList.add('hidden');
+            iconClose.classList.remove('hidden');
 
-        <a href="database.php" class="flex flex-col items-center gap-1 w-1/5 transition <?php echo ($page == 'database.php' || $page == 'master_items.php') ? 'text-emerald-400' : 'text-slate-500 hover:text-slate-300'; ?>">
-            <i class="fas fa-database text-xl mb-0.5"></i>
-            <span class="text-[9px] font-medium uppercase tracking-wide">Database</span>
-        </a>
+            // Ubah warna tombol jadi merah (biar kelihatan tombol close)
+            btn.classList.remove('bg-emerald-600');
+            btn.classList.add('bg-slate-700');
+        } else {
+            // SEMBUNYIKAN MENU
+            navbar.classList.add('translate-y-[150%]');
+            navbar.classList.remove('translate-y-0');
+            
+            // Ubah Icon jadi Hamburger
+            iconOpen.classList.remove('hidden');
+            iconClose.classList.add('hidden');
 
-        <a href="laporan.php" class="flex flex-col items-center gap-1 w-1/5 transition <?php echo ($page == 'laporan.php' || $page == 'my_laporan.php') ? 'text-emerald-400' : 'text-slate-500 hover:text-slate-300'; ?>">
-            <i class="fas fa-clipboard-list text-xl mb-0.5"></i>
-            <span class="text-[9px] font-medium uppercase tracking-wide">Report</span>
-        </a>
-
-        <a href="project.php" class="flex flex-col items-center gap-1 w-1/5 transition <?php echo ($page == 'project.php') ? 'text-emerald-400' : 'text-slate-500 hover:text-slate-300'; ?>">
-            <i class="fas fa-project-diagram text-xl mb-0.5"></i>
-            <span class="text-[9px] font-medium uppercase tracking-wide">Projects</span>
-        </a>
-
-        <a href="logout.php" class="flex flex-col items-center gap-1 w-1/5 text-slate-500 hover:text-red-400 transition">
-            <i class="fas fa-sign-out-alt text-xl mb-0.5"></i>
-            <span class="text-[9px] font-medium uppercase tracking-wide">Logout</span>
-        </a>
-
-    </nav>
+            // Balikin warna tombol
+            btn.classList.add('bg-emerald-600');
+            btn.classList.remove('bg-slate-700');
+        }
+    }
+</script>
 </body>
 
 </html>

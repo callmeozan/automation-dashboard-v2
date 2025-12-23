@@ -9,8 +9,6 @@ if (!isset($_SESSION['user_id'])) {
 }
 include 'config.php';
 // --- AMBIL DAFTAR TEAM UNTUK DROPDOWN PIC ---
-// $queryUsers = mysqli_query($conn, "SELECT short_name FROM tb_users WHERE short_name IS NOT NULL AND short_name != ''");
-// Tambahkan: AND role != 'admin'
 $queryUsers = mysqli_query($conn, "SELECT short_name FROM tb_users WHERE short_name IS NOT NULL AND short_name != '' AND role != 'admin'");
 $teamList = [];
 while ($u = mysqli_fetch_assoc($queryUsers)) {
@@ -43,21 +41,20 @@ $totalNotif = $countBreakdown + $countOverdue;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laporan Harian - Automation Portal</title>
+
     <link rel="icon" href="image/gajah_tunggal.png" type="image/png">
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
     <link rel="stylesheet" href="assets/css/layouts/sidebar.css">
     <link rel="stylesheet" href="assets/css/layouts/header.css">
     <link rel="stylesheet" href="assets/css/components/button.css">
     <link rel="stylesheet" href="assets/css/components/card.css">
     <link rel="stylesheet" href="assets/css/components/modal.css">
     <link rel="stylesheet" href="assets/css/main.css">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+    <link href="assets/vendor/tom-select.css" rel="stylesheet">
+    <script src="assets/vendor/tailwind.js"></script>
+    <script src="assets/vendor/sweetalert2.all.min.js"></script>
+    <script src="assets/vendor/apexcharts.js"></script>
+    <script src="assets/vendor/tom-select.complete.min.js"></script>
 
     <style>
         /* Custom Style Dark Mode untuk Tom Select */
@@ -98,17 +95,13 @@ $totalNotif = $countBreakdown + $countOverdue;
             cursor: pointer;
         }
 
-        /* 2. MODE GELAP (DEFAULT di Website Bapak) */
-        /* Kita paksa elemen date/time menggunakan skema warna GELAP.
-       Otomatis browser akan mengubah icon jadi PUTIH. */
+        /* 2. MODE GELAP */
         input[type="date"],
         input[type="time"] {
             color-scheme: dark;
         }
 
         /* 3. MODE TERANG (Saat ada class 'light-mode') */
-        /* Kita paksa balik ke skema warna TERANG.
-       Otomatis browser mengubah icon jadi HITAM. */
         body.light-mode input[type="date"],
         body.light-mode input[type="time"] {
             color-scheme: light;
@@ -117,7 +110,6 @@ $totalNotif = $countBreakdown + $countOverdue;
 </head>
 
 <body class="bg-slate-900 text-slate-200 font-sans antialiased">
-
     <div class="flex h-screen overflow-hidden">
 
         <aside id="sidebar" class="w-64 bg-slate-950 border-r border-slate-800 flex flex-col transition-all duration-300 hidden md:flex">
@@ -125,6 +117,7 @@ $totalNotif = $countBreakdown + $countOverdue;
                 <h1 class="text-xl font-bold text-white tracking-wide">JIS <span class="text-emerald-400">PORTAL.</span></h1>
             </div>
 
+            <!-- SIDEBAR ADA DISINI -->
             <nav class="flex-1 px-4 py-6 space-y-2">
                 <a href="dashboard.php" class="nav-item">
                     <i class="fas fa-tachometer-alt w-6"></i>
@@ -166,12 +159,20 @@ $totalNotif = $countBreakdown + $countOverdue;
                     </a>
                 <?php endif; ?>
 
+                <?php if ($_SESSION['role'] == 'admin'): ?>
+                    <div class="px-4 py-2 text-xs font-bold text-slate-500 uppercase tracking-wider mt-4">Admin Menu</div>
+                    <a href="manage_users.php" class="nav-item">
+                        <i class="fas fa-users-cog w-6"></i> <span class="font-medium">User Management</span>
+                    </a>
+                <?php endif; ?>
+
                 <a href="logout.php" class="nav-item">
                     <i class="fas fa-solid fa-right-from-bracket w-6"></i>
                     <span>Logout</span>
                 </a>
             </nav>
 
+            <!-- USER PROFILE ADA DISINI -->
             <div class="p-4 border-t border-slate-800">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-full bg-slate-700 border border-slate-500 overflow-hidden flex items-center justify-center">
@@ -190,19 +191,16 @@ $totalNotif = $countBreakdown + $countOverdue;
         </aside>
 
         <main class="flex-1 flex flex-col overflow-y-auto relative pb-24" id="main-content">
+            
+            <!-- HEADER ADA DISINI -->
             <header class="h-16 shrink-0 bg-slate-900/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-10 px-8 flex items-center justify-between">
                 <div class="flex items-center gap-4">
                     <button id="sidebarToggle" class="text-slate-400 hover:text-white mr-4 transition-transform active:scale-95">
-                        <!-- <i class="fas fa-bars text-xl"></i> -->
                     </button>
                     <h2 class="text-lg font-medium text-white">Daily Activity Report</h2>
                 </div>
 
                 <div class="flex items-center gap-4">
-                    <!-- <button class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-1.5 rounded-full text-sm font-medium transition shadow-lg shadow-indigo-600/20 flex items-center gap-2 btn-input-laporan" style="width: auto;">
-                        <i class="fas fa-plus"></i> Input Daily Activity
-                    </button> -->
-
                     <div class="relative">
                         <button onclick="toggleNotif()" class="p-2 text-slate-400 hover:text-white relative transition focus:outline-none">
                             <i class="fas fa-bell"></i>
@@ -283,11 +281,10 @@ $totalNotif = $countBreakdown + $countOverdue;
                 <div class="bg-slate-800 rounded-xl border border-slate-700 p-4">
                     <div class="flex flex-col md:flex-row gap-4 justify-between items-end">
                         <div class="flex flex-col md:flex-row gap-4 w-full md:w-auto">
-
                             <div class="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-4 w-full mb-6">
 
+                            <!-- FILTER BY DATE ADA DISINI -->
                                 <div class="flex flex-col md:flex-row gap-4 items-end w-full xl:w-auto">
-
                                     <div class="w-full md:w-64">
                                         <label class="block text-xs text-slate-400 mb-1">Search Daily Report</label>
                                         <div class="relative w-full">
@@ -317,6 +314,7 @@ $totalNotif = $countBreakdown + $countOverdue;
                                     </div>
                                 </div>
 
+                                <!-- INPUT DAN EXPORT EXCEL ADA DISINI -->
                                 <div class="flex gap-2 w-full xl:w-auto justify-start xl:justify-end mt-2 xl:mt-0">
                                     <button onclick="downloadExcel()" class="bg-slate-800 hover:bg-green-700 text-slate-300 px-4 py-2.5 rounded-lg border border-slate-700 text-sm transition flex items-center justify-center gap-2 flex-1 xl:flex-none">
                                         <i class="fas fa-file-excel"></i> <span>Export Excel</span>
@@ -328,10 +326,10 @@ $totalNotif = $countBreakdown + $countOverdue;
                                 </div>
 
                             </div>
-
                         </div>
                     </div>
 
+                    <!-- SEMUA DATA DI TABEL ADA DISINI -->
                     <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-lg">
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-sm text-slate-400">
@@ -347,6 +345,7 @@ $totalNotif = $countBreakdown + $countOverdue;
                                     </tr>
                                 </thead>
 
+                                <!-- PENGAMBILA DATA UNTUK TABEL DARI DATABASE ADA DISINI -->
                                 <tbody class="divide-y divide-slate-700/50" id="tableReportBody">
                                     <?php
                                     // Query: Ambil data laporan, urutkan dari yang paling baru (DESC)
@@ -354,9 +353,6 @@ $totalNotif = $countBreakdown + $countOverdue;
 
                                     while ($row = mysqli_fetch_assoc($query)) {
                                         $id = $row['report_id'];
-                                        // $clean_problem = htmlspecialchars(str_replace(array("\r", "\n"), " ", $row['problem']), ENT_QUOTES);
-                                        // $clean_action  = htmlspecialchars(str_replace(array("\r", "\n"), " ", $row['action']), ENT_QUOTES);
-
                                         // 2. Ganti Enter dengan Penanda Unik "_ENTER_"
                                         $clean_problem = str_replace(array("\r\n", "\r", "\n"), "_ENTER_", $row['problem']);
                                         $clean_action  = str_replace(array("\r\n", "\r", "\n"), "_ENTER_", $row['action']);
@@ -431,7 +427,6 @@ $totalNotif = $countBreakdown + $countOverdue;
                                                 <?php
                                                 // --- LOGIKA HAK AKSES ---
                                                 // 1. Cek apakah nama user login ada di kolom PIC laporan ini?
-                                                // (Pakai stripos biar gak masalah huruf besar/kecil)
                                                 $isMyReport = (stripos($row['pic'], $my_name) !== false);
 
                                                 // 2. Cek apakah dia Admin/Section (Bebas Edit semua)
@@ -451,14 +446,10 @@ $totalNotif = $countBreakdown + $countOverdue;
                                                     '<?php echo $row['time_finish']; ?>',
                                                     '<?php echo htmlspecialchars($row['machine_name'], ENT_QUOTES); ?>',
                                                     '<?php echo htmlspecialchars($row['category'], ENT_QUOTES); ?>',
-
                                                     '<?php echo $clean_problem; ?>',
                                                     '<?php echo $clean_action; ?>', 
-                                                    
                                                     '<?php echo htmlspecialchars($row['pic'], ENT_QUOTES); ?>',
-
-                                                    '<?php echo $clean_part; ?>',
-                                                    
+                                                    '<?php echo $clean_part; ?>',                                                  
                                                     '<?php echo $row['status']; ?>'
                                                 )" class="bg-slate-700 hover:bg-blue-600 text-white w-8 h-8 rounded flex items-center justify-center transition" title="Edit">
                                                             <i class="fas fa-pen text-xs"></i>
@@ -514,26 +505,6 @@ $totalNotif = $countBreakdown + $countOverdue;
                                                             </span>
                                                         </div>
                                                     </div>
-
-                                                    <!-- <div class="space-y-2">
-                                                        <h4 class="text-emerald-400 font-bold uppercase tracking-wider mb-2">📷 Lampiran / Evidence</h4>
-                                                        <?php if (!empty($row['evidence_file'])): ?>
-                                                            <a href="uploads/<?php echo $row['evidence_file']; ?>" target="_blank" class="bg-slate-900 p-2 rounded border border-slate-700 flex items-center justify-between group cursor-pointer hover:border-emerald-500 transition">
-                                                                <div class="flex items-center gap-3">
-                                                                    <div class="w-8 h-8 bg-slate-800 rounded flex items-center justify-center text-slate-400">
-                                                                        <i class="fas fa-image"></i>
-                                                                    </div>
-                                                                    <div>
-                                                                        <div class="text-white font-medium truncate w-32"><?php echo $row['evidence_file']; ?></div>
-                                                                        <div class="text-[10px] text-slate-500">Click to view</div>
-                                                                    </div>
-                                                                </div>
-                                                                <i class="fas fa-download text-slate-500 group-hover:text-emerald-400 mr-2"></i>
-                                                            </a>
-                                                        <?php else: ?>
-                                                            <span class="text-slate-500 italic">- Tidak ada lampiran -</span>
-                                                        <?php endif; ?>
-                                                    </div> -->
 
                                                     <div class="space-y-2">
                                                         <h4 class="text-emerald-400 font-bold uppercase tracking-wider mb-2">📷 Lampiran / Evidence</h4>
@@ -601,16 +572,6 @@ $totalNotif = $countBreakdown + $countOverdue;
                         </div>
                     </div>
                 </div>
-
-                <!-- <div class="mt-auto py-6 px-8 border-t border-slate-800/50 flex flex-col md:flex-row justify-between items-center gap-2">
-                    <p class="text-[10px] text-slate-600 font-medium tracking-wide">
-                        &copy; <?php echo date('Y'); ?> JIS Automation Dept. <span class="hidden md:inline">- Internal Use Only.</span>
-                    </p>
-                    <p class="text-[10px] text-slate-600 font-medium tracking-wide flex items-center gap-1">
-                        Maintained by <span class="text-slate-500 hover:text-emerald-500 transition cursor-default">zaan</span>
-                        <i class="fas fa-code text-[8px] opacity-50"></i>
-                    </p>
-                </div> -->
         </main>
     </div>
 
@@ -721,7 +682,6 @@ $totalNotif = $countBreakdown + $countOverdue;
 
                     <div>
                         <label class="block text-xs text-slate-400 mb-1 font-medium">12. Note / Sparepart Used</label>
-                        <!-- <input type="text" name="sparepart_used" placeholder="Catatan tambahan..." class="w-full bg-slate-950 border border-slate-700 text-white rounded px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"> -->
                         <textarea name="sparepart_used" rows="2" placeholder="Catatan tambahan..." class="w-full bg-slate-950 border border-slate-700 text-white rounded px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"></textarea>
                     </div>
 
@@ -734,7 +694,6 @@ $totalNotif = $countBreakdown + $countOverdue;
                                     <p class="text-sm text-slate-400 mb-1"><span class="font-semibold text-emerald-400">Klik untuk upload</span></p>
                                     <p id="file-name-display" class="text-xs text-emerald-400 mt-2 font-medium hidden"></p>
                                 </div>
-                                <!-- <input id="file_evidence" type="file" name="evidence" class="hidden" /> -->
                                 <input id="file_evidence" type="file" name="evidence[]" multiple accept="image/*,.pdf" class="hidden" />
                             </label>
                         </div>
@@ -847,7 +806,6 @@ $totalNotif = $countBreakdown + $countOverdue;
                         <label class="block text-xs text-slate-400 mb-1 font-medium">PIC</label>
                         <div class="relative">
                             <i class="fas fa-user absolute left-3 top-2.5 text-slate-500 text-xs"></i>
-                            <!-- <input type="text" name="pic" id="edit_pic" class="w-full bg-slate-950 border border-slate-700 text-white rounded pl-8 pr-3 py-2 text-sm focus:border-blue-500 focus:outline-none"> -->
                             <select name="pic[]" id="edit_pic" multiple placeholder="Pilih Teknisi..." autocomplete="off">
                                 <option value="">Pilih Personil...</option>
                                 <?php if (isset($teamList)) {
@@ -871,7 +829,6 @@ $totalNotif = $countBreakdown + $countOverdue;
 
                     <div>
                         <label class="block text-xs text-slate-400 mb-1 font-medium">Sparepart Used / Note</label>
-                        <!-- <input type="text" name="sparepart_used" id="edit_part" class="w-full bg-slate-950 border border-slate-700 text-white rounded px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"> -->
                         <textarea name="sparepart_used" id="edit_part" rows="2" placeholder="Catatan tambahan..." class="w-full bg-slate-950 border border-slate-700 text-white rounded px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"></textarea>
                     </div>
 
@@ -883,11 +840,8 @@ $totalNotif = $countBreakdown + $countOverdue;
                                     <i class="fas fa-cloud-upload-alt text-2xl text-slate-500 mb-2 group-hover:text-emerald-400 transition"></i>
                                     <p class="text-sm text-slate-400 mb-1"><span class="font-semibold text-emerald-400">Klik untuk ganti file</span></p>
                                     <p class="text-[10px] text-slate-500">Biarkan kosong jika tidak ingin mengubah.</p>
-
                                     <p id="file-name-edit" class="text-xs text-emerald-400 mt-2 font-medium hidden"></p>
                                 </div>
-
-                                <!-- <input id="file_evidence_edit" type="file" name="evidence" class="hidden" /> -->
                                 <input id="file_evidence_edit" type="file" name="evidence[]" multiple accept="image/*,.pdf" class="hidden" />
                             </label>
                         </div>
@@ -927,12 +881,9 @@ $totalNotif = $countBreakdown + $countOverdue;
             const realAction = act.split("_ENTER_").join("\n");
             document.getElementById('edit_problem').value = realProblem;
             document.getElementById('edit_action').value = realAction;
-            // document.getElementById('edit_problem').value = prob;
-            // document.getElementById('edit_action').value = act;
 
             const realPart = part.split("_ENTER_").join("\n");
             document.getElementById('edit_part').value = realPart;
-            // document.getElementById('edit_part').value = part;
             if (document.getElementById('edit_status')) document.getElementById('edit_status').value = status;
 
             // Populate Tom Select
@@ -1013,7 +964,6 @@ $totalNotif = $countBreakdown + $countOverdue;
             }
         }
 
-
         // ==========================================
         // 2. LOGIC UTAMA (DOM LOADED)
         // ==========================================
@@ -1046,28 +996,6 @@ $totalNotif = $countBreakdown + $countOverdue;
                     placeholder: "Pilih PIC..."
                 });
             }
-
-            // B. Logic Upload Filename
-            // const fileInput = document.getElementById('file_evidence');
-            // const fileNameDisplay = document.getElementById('file-name-display');
-            // if (fileInput && fileNameDisplay) {
-            //     fileInput.addEventListener('change', function(e) {
-            //         if (this.files.length > 0) {
-            //             fileNameDisplay.classList.remove('hidden');
-            //             fileNameDisplay.textContent = `📄 ${this.files[0].name}`;
-            //         }
-            //     });
-            // }
-            // const fileInputEdit = document.getElementById('file_evidence_edit');
-            // const fileNameEdit = document.getElementById('file-name-edit');
-            // if (fileInputEdit && fileNameEdit) {
-            //     fileInputEdit.addEventListener('change', function(e) {
-            //         if (this.files.length > 0) {
-            //             fileNameEdit.classList.remove('hidden');
-            //             fileNameEdit.textContent = `📄 ${this.files[0].name}`;
-            //         }
-            //     });
-            // }
 
             // B. Logic Upload Filename (MULTIPLE SUPPORT)
             const setupFileUpload = (inputId, displayId) => {
@@ -1256,36 +1184,79 @@ $totalNotif = $countBreakdown + $countOverdue;
         });
     </script>
 
-    <nav class="fixed bottom-0 left-0 w-full bg-slate-950 border-t border-slate-800 flex justify-around items-center py-3 z-50 md:hidden safe-area-pb">
+<button onclick="toggleMobileMenu()" id="mobileMenuBtn" class="fixed bottom-24 right-4 z-[60] md:hidden bg-emerald-600/50 text-white w-12 h-12 rounded-full shadow-lg shadow-emerald-900/50 flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 border-1 border-slate-900">
+    <i id="iconOpen" class="fas fa-bars text-lg"></i>
+    <i id="iconClose" class="fas fa-times text-lg hidden"></i>
+</button>
 
-        <?php $page = basename($_SERVER['PHP_SELF']); ?>
+<nav id="mobileNavbar" class="fixed bottom-4 left-4 right-4 bg-slate-900/90 backdrop-blur-md border border-slate-700 rounded-2xl flex justify-around items-center py-3 z-50 md:hidden transition-transform duration-300 ease-in-out translate-y-[150%] shadow-2xl">
 
-        <a href="dashboard.php" class="flex flex-col items-center gap-1 w-1/5 transition <?php echo ($page == 'dashboard.php') ? 'text-emerald-400' : 'text-slate-500 hover:text-slate-300'; ?>">
-            <i class="fas fa-tachometer-alt text-xl mb-0.5"></i>
-            <span class="text-[9px] font-medium uppercase tracking-wide">Home</span>
-        </a>
+    <?php $page = basename($_SERVER['PHP_SELF']); ?>
 
-        <a href="database.php" class="flex flex-col items-center gap-1 w-1/5 transition <?php echo ($page == 'database.php' || $page == 'master_items.php') ? 'text-emerald-400' : 'text-slate-500 hover:text-slate-300'; ?>">
-            <i class="fas fa-database text-xl mb-0.5"></i>
-            <span class="text-[9px] font-medium uppercase tracking-wide">Database</span>
-        </a>
+    <a href="dashboard.php" class="flex flex-col items-center gap-1 w-1/5 transition group <?php echo ($page == 'dashboard.php') ? 'text-emerald-400' : 'text-slate-400 hover:text-emerald-300'; ?>">
+        <i class="fas fa-tachometer-alt text-lg mb-0.5 group-active:scale-90 transition"></i>
+        <span class="text-[9px] font-medium uppercase tracking-wide">Home</span>
+    </a>
 
-        <a href="laporan.php" class="flex flex-col items-center gap-1 w-1/5 transition <?php echo ($page == 'laporan.php' || $page == 'my_laporan.php') ? 'text-emerald-400' : 'text-slate-500 hover:text-slate-300'; ?>">
-            <i class="fas fa-clipboard-list text-xl mb-0.5"></i>
-            <span class="text-[9px] font-medium uppercase tracking-wide">Report</span>
-        </a>
+    <a href="database.php" class="flex flex-col items-center gap-1 w-1/5 transition group <?php echo ($page == 'database.php' || $page == 'master_items.php') ? 'text-emerald-400' : 'text-slate-400 hover:text-emerald-300'; ?>">
+        <i class="fas fa-database text-lg mb-0.5 group-active:scale-90 transition"></i>
+        <span class="text-[9px] font-medium uppercase tracking-wide">Database</span>
+    </a>
 
-        <a href="project.php" class="flex flex-col items-center gap-1 w-1/5 transition <?php echo ($page == 'project.php') ? 'text-emerald-400' : 'text-slate-500 hover:text-slate-300'; ?>">
-            <i class="fas fa-project-diagram text-xl mb-0.5"></i>
-            <span class="text-[9px] font-medium uppercase tracking-wide">Projects</span>
-        </a>
+    <a href="laporan.php" class="flex flex-col items-center gap-1 w-1/5 transition group <?php echo ($page == 'laporan.php' || $page == 'my_laporan.php') ? 'text-emerald-400' : 'text-slate-400 hover:text-emerald-300'; ?>">
+        <i class="fas fa-clipboard-list text-lg mb-0.5 group-active:scale-90 transition"></i>
+        <span class="text-[9px] font-medium uppercase tracking-wide">Report</span>
+    </a>
 
-        <a href="logout.php" class="flex flex-col items-center gap-1 w-1/5 text-slate-500 hover:text-red-400 transition">
-            <i class="fas fa-sign-out-alt text-xl mb-0.5"></i>
-            <span class="text-[9px] font-medium uppercase tracking-wide">Logout</span>
-        </a>
+    <a href="project.php" class="flex flex-col items-center gap-1 w-1/5 transition group <?php echo ($page == 'project.php') ? 'text-emerald-400' : 'text-slate-400 hover:text-emerald-300'; ?>">
+        <i class="fas fa-project-diagram text-lg mb-0.5 group-active:scale-90 transition"></i>
+        <span class="text-[9px] font-medium uppercase tracking-wide">Projects</span>
+    </a>
 
-    </nav>
+    <a href="logout.php" class="flex flex-col items-center gap-1 w-1/5 text-slate-500 hover:text-red-400 transition group">
+        <i class="fas fa-sign-out-alt text-lg mb-0.5 group-active:scale-90 transition"></i>
+        <span class="text-[9px] font-medium uppercase tracking-wide">Logout</span>
+    </a>
+
+</nav>
+
+<script>
+    function toggleMobileMenu() {
+        const navbar = document.getElementById('mobileNavbar');
+        const iconOpen = document.getElementById('iconOpen');
+        const iconClose = document.getElementById('iconClose');
+        const btn = document.getElementById('mobileMenuBtn');
+
+        // Toggle Class untuk menampilkan/menyembunyikan Navbar
+        // translate-y-[150%] artinya geser ke bawah sejauh 150% dari tingginya (ngumpet)
+        // translate-y-0 artinya kembali ke posisi asal (muncul)
+        if (navbar.classList.contains('translate-y-[150%]')) {
+            // MUNCULKAN MENU
+            navbar.classList.remove('translate-y-[150%]');
+            navbar.classList.add('translate-y-0');
+            
+            // Ubah Icon jadi X
+            iconOpen.classList.add('hidden');
+            iconClose.classList.remove('hidden');
+
+            // Ubah warna tombol jadi merah (biar kelihatan tombol close)
+            btn.classList.remove('bg-emerald-600');
+            btn.classList.add('bg-slate-700');
+        } else {
+            // SEMBUNYIKAN MENU
+            navbar.classList.add('translate-y-[150%]');
+            navbar.classList.remove('translate-y-0');
+            
+            // Ubah Icon jadi Hamburger
+            iconOpen.classList.remove('hidden');
+            iconClose.classList.add('hidden');
+
+            // Balikin warna tombol
+            btn.classList.add('bg-emerald-600');
+            btn.classList.remove('bg-slate-700');
+        }
+    }
+</script>
 </body>
 
 </html>

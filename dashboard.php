@@ -5,10 +5,10 @@ session_start();
 if (!isset($_SESSION['user_id'])) {
     // Tendang balik ke halaman login
     header("Location: index.php");
-    exit(); // Stop script di sini, jangan lanjut ke bawah!
+    exit();
 }
+
 include 'config.php';
-// $queryUsers = mysqli_query($conn, "SELECT short_name FROM tb_users WHERE short_name IS NOT NULL AND short_name != ''");
 // Tambahkan: AND role != 'admin'
 $queryUsers = mysqli_query($conn, "SELECT short_name FROM tb_users WHERE short_name IS NOT NULL AND short_name != '' AND role != 'admin'");
 $teamList = [];
@@ -30,7 +30,6 @@ $countOverdue = mysqli_num_rows($queryOverdueList); // Hitung jumlahnya
 $totalNotif = $countBreakdown + $countOverdue;
 
 // --- LOGIC KPI CARDS (UPDATED) ---
-
 // 1. Hitung Project TO DO
 $queryToDo = mysqli_query($conn, "SELECT COUNT(*) as total FROM tb_projects WHERE status = 'To Do'");
 $totalToDo = mysqli_fetch_assoc($queryToDo)['total'];
@@ -49,7 +48,6 @@ $queryAsset = mysqli_query($conn, "SELECT COUNT(*) as total FROM tb_assets");
 $totalAssets = mysqli_fetch_assoc($queryAsset)['total'];
 
 // --- QUERY UNTUK TAB 2: MY DAILY REPORT ---
-
 // 1. Ambil ID User dari Session (Pasti ada karena sudah lolos cek login)
 $id_user = $_SESSION['user_id'];
 
@@ -73,8 +71,6 @@ $queryMyReport = mysqli_query($conn, "SELECT * FROM tb_daily_reports WHERE pic L
     <title>Automation Command Center</title>
 
     <link rel="icon" href="image/gajah_tunggal.png" type="image/png">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="assets/css/layouts/sidebar.css">
     <link rel="stylesheet" href="assets/css/layouts/header.css">
@@ -82,9 +78,12 @@ $queryMyReport = mysqli_query($conn, "SELECT * FROM tb_daily_reports WHERE pic L
     <link rel="stylesheet" href="assets/css/components/card.css">
     <link rel="stylesheet" href="assets/css/components/modal.css">
     <link rel="stylesheet" href="assets/css/main.css">
-    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link href="assets/vendor/tom-select.css" rel="stylesheet">
+    <script src="assets/vendor/tailwind.js"></script>
+    <script src="assets/vendor/sweetalert2.all.min.js"></script>
+    <script src="assets/vendor/tom-select.complete.min.js"></script>
+    <script defer src="assets/vendor/alpine.js"></script>
+    
 
     <style>
         /* Tambahkan #modalEditProject di sini */
@@ -110,16 +109,12 @@ $queryMyReport = mysqli_query($conn, "SELECT * FROM tb_daily_reports WHERE pic L
         /* Custom Style untuk Tom Select di Dark Mode */
         .ts-control {
             background-color: #0f172a !important;
-            /* slate-950 */
-            border: 1px solid #334155 !important;
-            /* slate-700 */
             color: #fff !important;
             border-radius: 0.5rem;
         }
 
         .ts-dropdown {
             background-color: #1e293b !important;
-            /* slate-800 */
             border: 1px solid #334155 !important;
             color: #fff !important;
         }
@@ -131,14 +126,12 @@ $queryMyReport = mysqli_query($conn, "SELECT * FROM tb_daily_reports WHERE pic L
 
         .ts-control .item {
             background-color: #4f46e5 !important;
-            /* indigo-600 */
             color: #fff !important;
             border-radius: 4px;
         }
 
         .ts-wrapper.multi .ts-control>div {
             background-color: #4f46e5 !important;
-            /* indigo-600 */
             color: white !important;
         }
     </style>
@@ -150,17 +143,13 @@ $queryMyReport = mysqli_query($conn, "SELECT * FROM tb_daily_reports WHERE pic L
             cursor: pointer;
         }
 
-        /* 2. MODE GELAP (DEFAULT di Website Bapak) */
-        /* Kita paksa elemen date/time menggunakan skema warna GELAP.
-       Otomatis browser akan mengubah icon jadi PUTIH. */
+        /* 2. MODE GELAP*/
         input[type="date"],
         input[type="time"] {
             color-scheme: dark;
         }
 
         /* 3. MODE TERANG (Saat ada class 'light-mode') */
-        /* Kita paksa balik ke skema warna TERANG.
-       Otomatis browser mengubah icon jadi HITAM. */
         body.light-mode input[type="date"],
         body.light-mode input[type="time"] {
             color-scheme: light;
@@ -168,7 +157,6 @@ $queryMyReport = mysqli_query($conn, "SELECT * FROM tb_daily_reports WHERE pic L
     </style>
 
 </head>
-
 <body class="bg-slate-900 text-slate-200 font-sans antialiased">
     <div class="flex h-screen overflow-hidden">
         <aside id="sidebar" class="w-64 bg-slate-950 border-r border-slate-800 flex flex-col transition-all duration-300 hidden md:flex">
@@ -176,6 +164,7 @@ $queryMyReport = mysqli_query($conn, "SELECT * FROM tb_daily_reports WHERE pic L
                 <h1 class="text-xl font-bold text-white tracking-wide">JIS <span class="text-emerald-400">PORTAL.</span></h1>
             </div>
 
+            <!-- SIDEBAR ADA DISINI -->
             <nav class="flex-1 px-4 py-6 space-y-2">
                 <a href="#" class="nav-item active">
                     <i class="fas fa-tachometer-alt w-6"></i>
@@ -212,10 +201,16 @@ $queryMyReport = mysqli_query($conn, "SELECT * FROM tb_daily_reports WHERE pic L
                 </a>
 
                 <?php if ($_SESSION['role'] == 'admin' || $_SESSION['role'] == 'section'): ?>
-                    <!-- <a href="#" class="nav-item"> -->
                     <a href="javascript:void(0)" onclick="openModal('modalAddUser')" class="nav-item hover:text-emerald-400 transition">
                         <i class="fa-solid fa-user-plus w-6"></i>
                         <span>Add User</span>
+                    </a>
+                <?php endif; ?>
+
+                <?php if ($_SESSION['role'] == 'admin'): ?>
+                    <div class="px-4 py-2 text-xs font-bold text-slate-500 uppercase tracking-wider mt-4">Admin Menu</div>
+                    <a href="manage_users.php" class="nav-item">
+                        <i class="fas fa-users-cog w-6"></i> <span class="font-medium">User Management</span>
                     </a>
                 <?php endif; ?>
 
@@ -225,6 +220,7 @@ $queryMyReport = mysqli_query($conn, "SELECT * FROM tb_daily_reports WHERE pic L
                 </a>
             </nav>
 
+            <!-- USER PROFILE ADA DISINI -->
             <div class="p-4 border-t border-slate-800">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-full bg-slate-700 border border-slate-500 overflow-hidden flex items-center justify-center">
@@ -237,26 +233,14 @@ $queryMyReport = mysqli_query($conn, "SELECT * FROM tb_daily_reports WHERE pic L
                             <?php echo isset($_SESSION['full_name']) ? $_SESSION['full_name'] : 'Guest'; ?>
                         </p>
                         <p class="text-xs text-emerald-500">Online</p>
-
-                        <!-- LAST LOGIN -->
-                        <!-- <?php
-                                // Kita query sebentar untuk ambil data terbaru
-                                $id_now = $_SESSION['user_id'];
-                                $qLast = mysqli_query($conn, "SELECT last_login FROM tb_users WHERE user_id='$id_now'");
-                                $dLast = mysqli_fetch_assoc($qLast);
-                                $lastLogin = $dLast['last_login'];
-                                ?>
-
-                        <p class="text-[10px] text-slate-400 mt-0.5">
-                            <i class="far fa-clock mr-1"></i>
-                            <?php echo ($lastLogin) ? date('d M, H:i', strtotime($lastLogin)) : 'Baru Gabung'; ?>
-                        </p> -->
                     </div>
                 </div>
             </div>
         </aside>
 
         <main class="flex-1 flex flex-col overflow-y-auto relative pb-24" id="main-content">
+
+            <!-- HEADER ADA DISINI -->
             <header class="h-16 shrink-0 bg-slate-900/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-10 px-8 flex items-center justify-between">
                 <div class="flex items-center gap-4">
                     <button id="sidebarToggle" class="text-slate-400 hover:text-white mr-4 transition-transform active:scale-95">
@@ -349,6 +333,7 @@ $queryMyReport = mysqli_query($conn, "SELECT * FROM tb_daily_reports WHERE pic L
                     <i class="fas fa-info-circle"></i> Presentation Mode Active.
                 </div>
 
+                <!-- KPI CONTAINER ADA DISINI -->
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6" id="kpi-container">
                     <div class="kpi-card hover:border-red-500/50 group transition">
                         <div class="flex justify-between items-start">
@@ -411,6 +396,7 @@ $queryMyReport = mysqli_query($conn, "SELECT * FROM tb_daily_reports WHERE pic L
                     </div>
                 </div>
 
+                <!-- SEARCH BAR DAN INPUT BAR ADA DISINI -->
                 <div id="operational-panel" class="grid grid-cols-1 lg:grid-cols-3 gap-8 transition-all duration-500">
                     <div class="lg:col-span-2 bg-slate-800 rounded-xl border border-slate-700 p-6 relative overflow-hidden">
                         <div class="absolute -right-10 -top-10 w-40 h-40 bg-emerald-500/10 rounded-full blur-3xl"></div>
@@ -445,7 +431,10 @@ $queryMyReport = mysqli_query($conn, "SELECT * FROM tb_daily_reports WHERE pic L
                     </div>
                 </div>
 
+                <!-- TABEL DATA SEMUA ADA DISINI -->
                 <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-lg" x-data="{ activeTab: 'project' }">
+
+                <!-- ACTIVE TAB ADA DISINI -->
                     <div class="flex border-b border-slate-700">
                         <button @click="activeTab = 'project'"
                             :class="activeTab === 'project' ? 'text-white border-b-2 border-emerald-500 bg-slate-700/50' : 'text-slate-400 hover:text-white hover:bg-slate-700/30'"
@@ -460,6 +449,7 @@ $queryMyReport = mysqli_query($conn, "SELECT * FROM tb_daily_reports WHERE pic L
                         </button>
                     </div>
 
+                    <!-- SEMUA DATA TABEL ADA DISINI -->
                     <div class="relative">
                         <div x-show="activeTab === 'project'" x-transition.opacity class="overflow-x-auto">
                             <table class="w-full text-left text-sm text-slate-400">
@@ -585,6 +575,7 @@ $queryMyReport = mysqli_query($conn, "SELECT * FROM tb_daily_reports WHERE pic L
     </div>
     </div>
 
+    <!-- FOOTER ADA DISINI -->
     <div class="mt-auto py-6 px-8 border-t border-slate-800/50 flex flex-col md:flex-row justify-between items-center gap-2">
         <p class="text-[10px] text-slate-600 font-medium tracking-wide">
             &copy; <?php echo date('Y'); ?> JIS Automation Dept. <span class="hidden md:inline">- Internal Use Only.</span>
@@ -704,7 +695,6 @@ $queryMyReport = mysqli_query($conn, "SELECT * FROM tb_daily_reports WHERE pic L
 
                     <div>
                         <label class="block text-xs text-slate-400 mb-1 font-medium">12. Note / Sparepart Used</label>
-                        <!-- <input type="text" name="sparepart_used" placeholder="Catatan tambahan..." class="w-full bg-slate-950 border border-slate-700 text-white rounded px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"> -->
                         <textarea name="sparepart_used" rows="2" placeholder="Catatan tambahan..." class="w-full bg-slate-950 border border-slate-700 text-white rounded px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"></textarea>
                     </div>
 
@@ -717,7 +707,6 @@ $queryMyReport = mysqli_query($conn, "SELECT * FROM tb_daily_reports WHERE pic L
                                     <p class="text-sm text-slate-400 mb-1"><span class="font-semibold text-emerald-400">Klik untuk upload</span></p>
                                     <p id="file-name-display" class="text-xs text-emerald-400 mt-2 font-medium hidden"></p>
                                 </div>
-                                <!-- <input id="file_evidence" type="file" name="evidence" class="hidden" /> -->
                                 <input id="file_evidence" type="file" name="evidence[]" multiple accept="image/*,.pdf" class="hidden" />
                             </label>
                         </div>
@@ -938,6 +927,7 @@ $queryMyReport = mysqli_query($conn, "SELECT * FROM tb_daily_reports WHERE pic L
                     <div>
                         <label class="block text-xs text-slate-400 mb-1 font-medium">Role / Jabatan</label>
                         <select name="role" class="w-full bg-slate-950 border border-slate-700 text-white rounded px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none">
+                            <option value="-">--Pilih--</option>
                             <option value="worker">Worker (Lapangan)</option>
                             <option value="officer">Officer (Staff)</option>
                             <option value="section">Section Head</option>
@@ -1018,7 +1008,6 @@ $queryMyReport = mysqli_query($conn, "SELECT * FROM tb_daily_reports WHERE pic L
             Swal.fire({
                 icon: 'success',
                 title: 'Berhasil!',
-                // LOGIKA PINTAR: Kalau ada pesan khusus (msg), pakai itu. Kalau tidak, pakai default.
                 text: msg || 'Data berhasil disimpan.',
                 background: '#1e293b',
                 color: '#fff',
@@ -1289,36 +1278,79 @@ $queryMyReport = mysqli_query($conn, "SELECT * FROM tb_daily_reports WHERE pic L
     <script src="assets/js/ui-sidebar.js"></script>
     <script src="assets/js/ui-modal.js"></script>
 
-    <nav class="fixed bottom-0 left-0 w-full bg-slate-950 border-t border-slate-800 flex justify-around items-center py-3 z-50 md:hidden safe-area-pb">
+<button onclick="toggleMobileMenu()" id="mobileMenuBtn" class="fixed bottom-24 right-4 z-[60] md:hidden bg-emerald-600/50 text-white w-12 h-12 rounded-full shadow-lg shadow-emerald-900/50 flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 border-1 border-slate-900">
+    <i id="iconOpen" class="fas fa-bars text-lg"></i>
+    <i id="iconClose" class="fas fa-times text-lg hidden"></i>
+</button>
 
-        <?php $page = basename($_SERVER['PHP_SELF']); ?>
+<nav id="mobileNavbar" class="fixed bottom-4 left-4 right-4 bg-slate-900/90 backdrop-blur-md border border-slate-700 rounded-2xl flex justify-around items-center py-3 z-50 md:hidden transition-transform duration-300 ease-in-out translate-y-[150%] shadow-2xl">
 
-        <a href="dashboard.php" class="flex flex-col items-center gap-1 w-1/5 transition <?php echo ($page == 'dashboard.php') ? 'text-emerald-400' : 'text-slate-500 hover:text-slate-300'; ?>">
-            <i class="fas fa-tachometer-alt text-xl mb-0.5"></i>
-            <span class="text-[9px] font-medium uppercase tracking-wide">Home</span>
-        </a>
+    <?php $page = basename($_SERVER['PHP_SELF']); ?>
 
-        <a href="database.php" class="flex flex-col items-center gap-1 w-1/5 transition <?php echo ($page == 'database.php' || $page == 'master_items.php') ? 'text-emerald-400' : 'text-slate-500 hover:text-slate-300'; ?>">
-            <i class="fas fa-database text-xl mb-0.5"></i>
-            <span class="text-[9px] font-medium uppercase tracking-wide">Database</span>
-        </a>
+    <a href="dashboard.php" class="flex flex-col items-center gap-1 w-1/5 transition group <?php echo ($page == 'dashboard.php') ? 'text-emerald-400' : 'text-slate-400 hover:text-emerald-300'; ?>">
+        <i class="fas fa-tachometer-alt text-lg mb-0.5 group-active:scale-90 transition"></i>
+        <span class="text-[9px] font-medium uppercase tracking-wide">Home</span>
+    </a>
 
-        <a href="laporan.php" class="flex flex-col items-center gap-1 w-1/5 transition <?php echo ($page == 'laporan.php' || $page == 'my_laporan.php') ? 'text-emerald-400' : 'text-slate-500 hover:text-slate-300'; ?>">
-            <i class="fas fa-clipboard-list text-xl mb-0.5"></i>
-            <span class="text-[9px] font-medium uppercase tracking-wide">Report</span>
-        </a>
+    <a href="database.php" class="flex flex-col items-center gap-1 w-1/5 transition group <?php echo ($page == 'database.php' || $page == 'master_items.php') ? 'text-emerald-400' : 'text-slate-400 hover:text-emerald-300'; ?>">
+        <i class="fas fa-database text-lg mb-0.5 group-active:scale-90 transition"></i>
+        <span class="text-[9px] font-medium uppercase tracking-wide">Database</span>
+    </a>
 
-        <a href="project.php" class="flex flex-col items-center gap-1 w-1/5 transition <?php echo ($page == 'project.php') ? 'text-emerald-400' : 'text-slate-500 hover:text-slate-300'; ?>">
-            <i class="fas fa-project-diagram text-xl mb-0.5"></i>
-            <span class="text-[9px] font-medium uppercase tracking-wide">Projects</span>
-        </a>
+    <a href="laporan.php" class="flex flex-col items-center gap-1 w-1/5 transition group <?php echo ($page == 'laporan.php' || $page == 'my_laporan.php') ? 'text-emerald-400' : 'text-slate-400 hover:text-emerald-300'; ?>">
+        <i class="fas fa-clipboard-list text-lg mb-0.5 group-active:scale-90 transition"></i>
+        <span class="text-[9px] font-medium uppercase tracking-wide">Report</span>
+    </a>
 
-        <a href="logout.php" class="flex flex-col items-center gap-1 w-1/5 text-slate-500 hover:text-red-400 transition">
-            <i class="fas fa-sign-out-alt text-xl mb-0.5"></i>
-            <span class="text-[9px] font-medium uppercase tracking-wide">Logout</span>
-        </a>
+    <a href="project.php" class="flex flex-col items-center gap-1 w-1/5 transition group <?php echo ($page == 'project.php') ? 'text-emerald-400' : 'text-slate-400 hover:text-emerald-300'; ?>">
+        <i class="fas fa-project-diagram text-lg mb-0.5 group-active:scale-90 transition"></i>
+        <span class="text-[9px] font-medium uppercase tracking-wide">Projects</span>
+    </a>
 
-    </nav>
+    <a href="logout.php" class="flex flex-col items-center gap-1 w-1/5 text-slate-500 hover:text-red-400 transition group">
+        <i class="fas fa-sign-out-alt text-lg mb-0.5 group-active:scale-90 transition"></i>
+        <span class="text-[9px] font-medium uppercase tracking-wide">Logout</span>
+    </a>
+
+</nav>
+
+<script>
+    function toggleMobileMenu() {
+        const navbar = document.getElementById('mobileNavbar');
+        const iconOpen = document.getElementById('iconOpen');
+        const iconClose = document.getElementById('iconClose');
+        const btn = document.getElementById('mobileMenuBtn');
+
+        // Toggle Class untuk menampilkan/menyembunyikan Navbar
+        // translate-y-[150%] artinya geser ke bawah sejauh 150% dari tingginya (ngumpet)
+        // translate-y-0 artinya kembali ke posisi asal (muncul)
+        if (navbar.classList.contains('translate-y-[150%]')) {
+            // MUNCULKAN MENU
+            navbar.classList.remove('translate-y-[150%]');
+            navbar.classList.add('translate-y-0');
+            
+            // Ubah Icon jadi X
+            iconOpen.classList.add('hidden');
+            iconClose.classList.remove('hidden');
+
+            // Ubah warna tombol jadi merah (biar kelihatan tombol close)
+            btn.classList.remove('bg-emerald-600');
+            btn.classList.add('bg-slate-700');
+        } else {
+            // SEMBUNYIKAN MENU
+            navbar.classList.add('translate-y-[150%]');
+            navbar.classList.remove('translate-y-0');
+            
+            // Ubah Icon jadi Hamburger
+            iconOpen.classList.remove('hidden');
+            iconClose.classList.add('hidden');
+
+            // Balikin warna tombol
+            btn.classList.add('bg-emerald-600');
+            btn.classList.remove('bg-slate-700');
+        }
+    }
+</script>
 </body>
 
 </html>
